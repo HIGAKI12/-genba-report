@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>現場報告メール自動作成</title>
+<title>現場報告書作成</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -17,7 +17,6 @@
 }
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;}
 
-/* API Screen */
 #api-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
 .api-card{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:32px 28px;max-width:420px;width:100%;}
 .api-logo{font-size:40px;text-align:center;margin-bottom:12px;}
@@ -31,25 +30,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .api-btn{width:100%;padding:14px;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
 .api-error{font-size:12px;color:var(--red);margin-top:8px;display:none;}
 
-/* Nav */
 #main-app{display:none;}
 .nav{background:var(--blue);position:sticky;top:0;z-index:100;}
 .nav-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;padding:0 16px;}
 .nav-logo{font-size:16px;font-weight:900;color:#fff;padding:14px 0;flex:1;}
 .nav-tabs{display:flex;}
-.nav-tab{padding:14px 14px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
+.nav-tab{padding:14px 12px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
 .nav-tab.active{color:#fff;border-bottom-color:#fff;}
 .nav-key{font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer;padding:14px 0 14px 10px;text-decoration:underline;}
 
 .page{display:none;max-width:680px;margin:0 auto;padding:20px 16px 60px;}
 .page.visible{display:block;}
 
-/* Cards */
 .card{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:20px;margin-bottom:16px;}
 .card-title{font-size:13px;font-weight:700;color:var(--mid);letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-.card-title-right{margin-left:auto;font-size:11px;font-weight:600;color:var(--blue);cursor:pointer;}
 
-/* Form */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 @media(max-width:480px){.form-row{grid-template-columns:1fr;}}
 .form-group{display:flex;flex-direction:column;gap:6px;}
@@ -59,14 +54,14 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);}
 .form-textarea{resize:vertical;min-height:70px;line-height:1.6;}
 
-/* Saved sites */
-.saved-sites{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-.site-chip{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--blue2);border:1.5px solid var(--blue3);border-radius:50px;font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;}
-.site-chip-del{color:var(--sub);font-size:14px;line-height:1;background:none;border:none;cursor:pointer;padding:0 0 0 2px;}
-.save-site-btn{padding:7px 14px;border:1.5px dashed var(--blue3);border-radius:50px;background:transparent;color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-
-/* Before/After */
-.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.area-item{border:1.5px solid #E2E8F0;border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;background:#FAFBFF;}
+.area-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.area-title{font-size:12px;font-weight:700;color:var(--mid);}
+.area-remove{border:none;background:none;color:#B0BAC9;cursor:pointer;font-size:20px;padding:0;line-height:1;}
+.area-name-input{width:100%;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:8px;padding:9px 12px;color:var(--dark);background:#fff;outline:none;margin-bottom:12px;}
+.area-name-input:focus{border-color:var(--blue);}
+.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.area-grid{grid-template-columns:1fr;}}
 .ba-badge{font-size:11px;font-weight:800;padding:4px 12px;border-radius:50px;letter-spacing:.5px;display:inline-block;margin-bottom:8px;}
 .ba-badge.before{background:var(--red2);color:var(--red);}
 .ba-badge.after{background:var(--green2);color:var(--green);}
@@ -79,116 +74,48 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .ba-preview-label{position:absolute;bottom:0;left:0;right:0;padding:5px 8px;font-size:10px;font-weight:700;text-align:center;}
 .ba-preview-label.before{background:rgba(220,38,38,0.85);color:#fff;}
 .ba-preview-label.after{background:rgba(22,163,74,0.85);color:#fff;}
-.ba-desc-input{width:100%;font-family:'Noto Sans JP',sans-serif;font-size:12px;border:1.5px solid #E2E8F0;border-radius:8px;padding:8px 10px;color:var(--dark);background:#fff;outline:none;margin-top:8px;}
-.ba-section-item{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #F0F4F8;}
-.ba-section-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-.ba-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.ba-section-title{font-size:12px;font-weight:700;color:var(--sub);}
-.ba-remove-section{border:none;background:none;color:#B0BAC9;cursor:pointer;font-size:20px;}
-.add-ba-btn{width:100%;padding:11px;border:1.5px dashed var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;}
+.desc-textarea{width:100%;font-family:'Noto Sans JP',sans-serif;font-size:12px;border:1.5px solid #E2E8F0;border-radius:8px;padding:8px 10px;color:var(--dark);background:#fff;outline:none;margin-top:8px;resize:vertical;min-height:60px;line-height:1.5;}
+.desc-textarea:focus{border-color:var(--blue);}
+.add-area-btn{width:100%;padding:11px;border:1.5px dashed var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;}
 
-/* General photos */
-.upload-zone{border:2px dashed var(--blue3);border-radius:var(--radius-sm);padding:22px 20px;text-align:center;cursor:pointer;background:var(--blue2);position:relative;}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:12px;}
-.preview-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:4/3;}
-.preview-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.preview-remove{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;border:none;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}
-
-/* Buttons */
 .gen-btn{width:100%;padding:16px;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;transition:all .2s;}
 .gen-btn:hover{background:#1640B8;}
 .gen-btn:disabled{opacity:.5;cursor:not-allowed;}
 
-/* Result */
-.result-card{display:none;}
-.result-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-.result-label{font-size:13px;font-weight:700;color:var(--green);}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-.action-btn{padding:8px 14px;border:1.5px solid #E2E8F0;border-radius:50px;background:#fff;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;}
-.action-btn:hover{background:var(--blue2);}
-.outlook-btn{padding:8px 16px;border:none;border-radius:50px;background:#0072C6;color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
-.pdf-btn{padding:8px 16px;border:none;border-radius:50px;background:#DC2626;color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
-.email-preview{background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:var(--radius-sm);padding:18px;}
-.email-field{display:flex;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #E2E8F0;font-size:13px;align-items:flex-start;}
-.ef-label{font-weight:700;color:var(--sub);min-width:46px;flex-shrink:0;padding-top:8px;}
-.ef-input{flex:1;font-family:'Noto Sans JP',sans-serif;font-size:13px;border:1.5px solid #E2E8F0;border-radius:8px;padding:7px 10px;background:#fff;color:var(--dark);outline:none;}
-.ef-input:focus{border-color:var(--blue);}
-.email-body-edit{width:100%;min-height:280px;font-family:'Noto Sans JP',sans-serif;font-size:13px;line-height:1.9;border:1.5px solid #E2E8F0;border-radius:8px;padding:12px;color:var(--dark);outline:none;resize:vertical;background:#fff;}
-.email-body-edit:focus{border-color:var(--blue);}
-.regen-btn{margin-top:12px;width:100%;padding:12px;border:1.5px solid var(--blue3);border-radius:var(--radius-sm);background:#fff;color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
-.outlook-note{font-size:11px;color:var(--sub);margin-top:8px;text-align:center;line-height:1.6;}
-
-/* History */
 .history-empty{text-align:center;padding:48px 20px;color:var(--sub);font-size:14px;}
 .history-empty-icon{font-size:40px;margin-bottom:12px;}
-.history-item{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:16px 18px;margin-bottom:12px;cursor:pointer;transition:all .2s;}
-.history-item:hover{border-color:var(--blue3);background:var(--blue2);}
-.history-item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
-.history-item-title{font-size:14px;font-weight:700;color:var(--dark);}
-.history-item-date{font-size:11px;color:var(--sub);flex-shrink:0;margin-left:8px;}
-.history-item-to{font-size:12px;color:var(--sub);margin-bottom:6px;}
-.history-item-preview{font-size:12px;color:var(--mid);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-.history-item-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-.history-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;background:var(--green2);color:var(--green);}
-.history-del{border:none;background:none;color:#B0BAC9;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;}
-.history-del:hover{background:var(--red2);color:var(--red);}
 
-/* Modal */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;padding:20px;overflow-y:auto;}
-.modal-overlay.visible{display:flex;align-items:flex-start;justify-content:center;}
-.modal{background:var(--card);border-radius:var(--radius);max-width:640px;width:100%;padding:24px;margin:auto;}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.modal-title{font-size:16px;font-weight:700;color:var(--dark);}
-.modal-close{border:none;background:none;font-size:22px;color:var(--sub);cursor:pointer;}
-.modal-field{margin-bottom:12px;}
-.modal-label{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.5px;margin-bottom:4px;}
-.modal-val{font-size:13px;color:var(--dark);line-height:1.7;white-space:pre-wrap;background:#F8FAFC;border-radius:8px;padding:10px 12px;}
-.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.select-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-radius:var(--radius-sm);border:1.5px solid #E2E8F0;margin-bottom:12px;}
+.select-bar-left{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;}
+.select-count{font-size:11px;color:var(--sub);}
+
+.report-item{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:16px 18px;margin-bottom:10px;transition:all .2s;}
+.report-item.selected{border-color:var(--blue);background:var(--blue2);}
+.report-item-row{display:flex;align-items:flex-start;gap:12px;}
+.report-checkbox{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;margin-top:3px;}
+.report-info{flex:1;}
+.report-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:3px;}
+.report-meta{font-size:11px;color:var(--sub);margin-bottom:5px;}
+.report-area-names{font-size:11px;color:var(--sub);}
+.report-actions{display:flex;gap:6px;margin-top:10px;}
+.small-btn{padding:5px 12px;border:1.5px solid #E2E8F0;border-radius:50px;background:#fff;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;}
+.small-btn:hover{background:var(--blue2);border-color:var(--blue3);}
+.small-btn.danger{color:var(--red);}
+.small-btn.danger:hover{background:var(--red2);border-color:var(--red);}
+
+.mail-card{display:none;}
+.email-body-area{width:100%;min-height:300px;font-family:'Noto Sans JP',sans-serif;font-size:13px;line-height:1.9;border:1.5px solid #E2E8F0;border-radius:8px;padding:12px;color:var(--dark);outline:none;resize:vertical;background:#fff;margin-bottom:12px;}
+.email-body-area:focus{border-color:var(--blue);}
+.copy-btn{width:100%;padding:14px;border:none;border-radius:var(--radius-sm);background:var(--green);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;}
+.copy-btn:hover{background:#15803D;}
+.pdf-dl-btn{width:100%;padding:13px;border:1.5px solid var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.pdf-dl-btn:hover{background:#dce9ff;}
+.note-text{font-size:11px;color:var(--sub);margin-top:8px;text-align:center;line-height:1.6;}
 
 .loading-dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin:0 3px;animation:ld .9s infinite;}
 .loading-dots span:nth-child(2){animation-delay:.2s;}
 .loading-dots span:nth-child(3){animation-delay:.4s;}
 @keyframes ld{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
-
-.step-row{display:flex;margin-bottom:20px;}
-.step{flex:1;text-align:center;position:relative;}
-.step::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#E2E8F0;z-index:0;}
-.step:last-child::after{display:none;}
-.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid #E2E8F0;background:#fff;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#B0BAC9;position:relative;z-index:1;transition:all .3s;}
-.step-dot.done{background:var(--green);border-color:var(--green);color:#fff;}
-.step-dot.active{background:var(--blue);border-color:var(--blue);color:#fff;}
-.step-name{font-size:10px;font-weight:700;color:#B0BAC9;}
-.step-name.active{color:var(--blue);}
-.step-name.done{color:var(--green);}
-
-/* PDF hidden print area */
-#pdf-area{display:none;}
-@media print{
-  body > *{display:none !important;}
-  #pdf-area{display:block !important;font-family:'Noto Sans JP',sans-serif;color:#0F1923;padding:0;margin:0;}
-  .pdf-page{padding:32px 36px;max-width:100%;}
-  .pdf-header{border-bottom:3px solid #1B4FD8;padding-bottom:16px;margin-bottom:24px;}
-  .pdf-header-title{font-size:22px;font-weight:900;color:#1B4FD8;margin-bottom:4px;}
-  .pdf-header-meta{font-size:12px;color:#6B7A8D;display:flex;gap:20px;flex-wrap:wrap;}
-  .pdf-section{margin-bottom:24px;}
-  .pdf-section-title{font-size:14px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:12px;}
-  .pdf-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:16px;}
-  .pdf-info-item{font-size:12px;}
-  .pdf-info-label{color:#6B7A8D;font-weight:700;font-size:10px;letter-spacing:.5px;margin-bottom:2px;}
-  .pdf-info-val{color:#0F1923;font-weight:500;}
-  .pdf-body{font-size:13px;line-height:1.9;white-space:pre-wrap;color:#0F1923;}
-  .pdf-ba-section{margin-bottom:20px;}
-  .pdf-ba-label{font-size:12px;font-weight:700;color:#3A4A5C;margin-bottom:8px;}
-  .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .pdf-ba-slot{}
-  .pdf-ba-slot-label{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
-  .pdf-ba-slot-label.before{background:#FEE2E2;color:#DC2626;}
-  .pdf-ba-slot-label.after{background:#DCFCE7;color:#16A34A;}
-  .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;}
-  .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F1EFE8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;}
-  .pdf-footer{border-top:1px solid #E2E8F0;padding-top:12px;margin-top:24px;font-size:11px;color:#6B7A8D;display:flex;justify-content:space-between;}
-}
 </style>
 </head>
 <body>
@@ -197,7 +124,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 <div id="api-screen">
   <div class="api-card">
     <div class="api-logo">🏗️</div>
-    <div class="api-title">現場報告メール自動作成</div>
+    <div class="api-title">現場報告書作成</div>
     <div class="api-sub">はじめにAnthropic APIキーを入力してください。<br>キーはこのブラウザにのみ保存されます。</div>
     <div class="api-label">APIキー</div>
     <input class="api-input" type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off">
@@ -213,483 +140,459 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
     <div class="nav-inner">
       <div class="nav-logo">🏗️ 現場報告</div>
       <div class="nav-tabs">
-        <button class="nav-tab active" id="tab-report" onclick="showPage('report')">作成</button>
-        <button class="nav-tab" id="tab-history" onclick="showPage('history')">履歴</button>
+        <button class="nav-tab active" id="tab-create" onclick="showPage('create')">作成</button>
+        <button class="nav-tab" id="tab-history" onclick="showPage('history')">履歴・メール</button>
       </div>
       <span class="nav-key" onclick="resetKey()">🔑</span>
     </div>
   </div>
 
-  <!-- Report Page -->
-  <div class="page visible" id="page-report">
+  <!-- 作成ページ -->
+  <div class="page visible" id="page-create">
     <div style="height:16px;"></div>
-    <div class="step-row">
-      <div class="step"><div class="step-dot active" id="s1">1</div><div class="step-name active" id="sn1">写真</div></div>
-      <div class="step"><div class="step-dot" id="s2">2</div><div class="step-name" id="sn2">情報</div></div>
-      <div class="step"><div class="step-dot" id="s3">3</div><div class="step-name" id="sn3">生成</div></div>
-    </div>
 
-    <!-- Before/After -->
     <div class="card">
-      <div class="card-title">📸 ビフォーアフター写真</div>
-      <div id="ba-sections"><div style="text-align:center;color:var(--sub);font-size:13px;padding:8px 0;">まだ登録されていません</div></div>
-      <button class="add-ba-btn" onclick="addBASection()">＋ ビフォーアフターを追加</button>
-    </div>
-
-    <!-- General photos -->
-    <div class="card">
-      <div class="card-title">🏗️ その他の現場写真（任意）</div>
-      <div class="upload-zone">
-        <input type="file" accept="image/*" multiple onchange="handleGeneral(event)">
-        <div style="font-size:26px;margin-bottom:4px;">📷</div>
-        <div style="font-size:13px;font-weight:700;color:var(--blue);">写真を選択（複数OK）</div>
-      </div>
-      <div id="general-grid" class="preview-grid"></div>
-    </div>
-
-    <!-- Info -->
-    <div class="card">
-      <div class="card-title">
-        📋 報告情報
-        <span class="card-title-right" onclick="saveCurrentSite()">💾 この現場を保存</span>
-      </div>
-      <div id="saved-sites-row" style="margin-bottom:14px;display:none;">
-        <div style="font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.5px;margin-bottom:8px;">保存済み現場</div>
-        <div id="saved-sites" class="saved-sites"></div>
+      <div class="card-title">📋 基本情報</div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">現場名・工事名</div><input class="form-input" id="site-name" placeholder="例：トレ・パーチェ一宮 4月定期清掃" type="text"></div>
+        <div class="form-group"><div class="form-label">作業日</div><input class="form-input" id="report-date" type="date"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">現場名・工事名</div><input class="form-input" id="site-name" placeholder="例：〇〇ビル新築工事" type="text"></div>
-        <div class="form-group"><div class="form-label">報告日</div><input class="form-input" id="report-date" type="date"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><div class="form-label">報告者名</div><input class="form-input" id="reporter" placeholder="例：山田 太郎" type="text"></div>
-        <div class="form-group"><div class="form-label">取引先メールアドレス</div><input class="form-input" id="recipient-email" placeholder="例：tanaka@example.com" type="email"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><div class="form-label">宛先名</div><input class="form-input" id="recipient-name" placeholder="例：田中様" type="text"></div>
-        <div class="form-group"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full"><div class="form-label">メールのトーン</div>
+        <div class="form-group"><div class="form-label">報告者名</div><input class="form-input" id="reporter" placeholder="例：檜垣" type="text"></div>
+        <div class="form-group"><div class="form-label">メールのトーン</div>
           <select class="form-select" id="tone"><option>丁寧・フォーマル</option><option>簡潔・ビジネス</option></select>
         </div>
       </div>
       <div class="form-row">
-        <div class="form-group full"><div class="form-label">特記事項・伝えたいこと（任意）</div>
-          <textarea class="form-textarea" id="notes" placeholder="例：来週から外壁工事開始予定、天候不順により2日遅れ など"></textarea>
-        </div>
+        <div class="form-group"><div class="form-label">取引先メールアドレス</div><input class="form-input" id="recipient-email" placeholder="例：tanaka@example.com" type="email"></div>
+        <div class="form-group"><div class="form-label">宛先名（会社名・担当者名）</div><input class="form-input" id="recipient-name" placeholder="例：三和住宅株式会社 御中" type="text"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
       </div>
     </div>
 
-    <button class="gen-btn" id="gen-btn" onclick="generate()">✉️ AIでメールを自動生成する</button>
-
-    <!-- Result -->
-    <div class="card result-card" id="result-card">
-      <div class="result-header">
-        <div class="result-label">✅ メールが生成されました</div>
-        <div class="btn-row">
-          <button class="action-btn" onclick="copyEmail()">📋 コピー</button>
-          <button class="outlook-btn" onclick="openOutlook()">📧 Outlookで開く</button>
-          <button class="pdf-btn" onclick="exportPDF()">📄 PDF出力</button>
-        </div>
-      </div>
-      <div class="email-preview">
-        <div class="email-field"><span class="ef-label">宛先</span><input class="ef-input" id="out-to" type="email"></div>
-        <div class="email-field" id="cc-row" style="display:none;"><span class="ef-label">CC</span><input class="ef-input" id="out-cc" type="email"></div>
-        <div class="email-field"><span class="ef-label">件名</span><input class="ef-input" id="out-subject" type="text"></div>
-        <textarea class="email-body-edit" id="out-body"></textarea>
-      </div>
-      <div class="outlook-note">✏️ 内容を編集してから各ボタンを押すと反映されます</div>
-      <button class="regen-btn" onclick="generate()">🔄 もう一度AIで生成する</button>
+    <div class="card">
+      <div class="card-title">🔨 施工前後の変化</div>
+      <div id="areas-container"></div>
+      <button class="add-area-btn" onclick="addArea()">＋ 箇所を追加</button>
     </div>
+
+    <div class="card">
+      <div class="card-title">📝 特記事項（任意）</div>
+      <textarea class="form-textarea" id="notes" placeholder="例：各箇所とも大きな損傷等は確認されませんでした。次回定期清掃は7月を予定。"></textarea>
+    </div>
+
+    <button class="gen-btn" onclick="savePDF()">📄 PDF報告書を出力・保存</button>
   </div>
 
-  <!-- History Page -->
+  <!-- 履歴・メールページ -->
   <div class="page" id="page-history">
     <div style="height:16px;"></div>
-    <div class="card" style="padding:14px 18px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;font-weight:700;color:var(--mid);">📁 送信済みメール履歴</div>
-        <button onclick="clearAllHistory()" style="font-size:11px;color:var(--sub);background:none;border:none;cursor:pointer;text-decoration:underline;">全削除</button>
+
+    <div id="select-bar" class="select-bar" style="display:none;">
+      <label class="select-bar-left">
+        <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--blue);">
+        全て選択
+      </label>
+      <span class="select-count" id="select-count"></span>
+    </div>
+
+    <div id="reports-list"></div>
+
+    <div id="mail-section" style="display:none;">
+      <div class="card">
+        <div class="card-title">✉️ メール文章を生成</div>
+        <button class="gen-btn" id="mail-gen-btn" onclick="generateEmail()" style="margin-bottom:0;">✉️ 選択したレポートのメール文を生成</button>
+      </div>
+      <div class="card mail-card" id="mail-result-card">
+        <div class="card-title" style="color:var(--green);">✅ メール文章が生成されました</div>
+        <textarea class="email-body-area" id="email-body-out"></textarea>
+        <button class="copy-btn" onclick="copyEmailBody()">📋 メール文章をコピー</button>
+        <button class="pdf-dl-btn" onclick="downloadSelectedPDFs()">📄 選択したPDFをダウンロード</button>
+        <div class="note-text">ダウンロードしたPDFをメールに添付してお送りください</div>
       </div>
     </div>
-    <div id="history-list"></div>
   </div>
 </div>
-
-<!-- Detail Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-title"></div>
-      <button class="modal-close" onclick="closeModalDirect()">×</button>
-    </div>
-    <div class="modal-field"><div class="modal-label">宛先</div><div class="modal-val" id="modal-to"></div></div>
-    <div class="modal-field"><div class="modal-label">件名</div><div class="modal-val" id="modal-subject"></div></div>
-    <div class="modal-field"><div class="modal-label">本文</div><div class="modal-val" id="modal-body" style="max-height:280px;overflow-y:auto;"></div></div>
-    <div class="modal-actions">
-      <button class="action-btn" onclick="copyFromModal()">📋 コピー</button>
-      <button class="outlook-btn" onclick="openOutlookFromModal()">📧 Outlookで開く</button>
-      <button class="pdf-btn" onclick="exportPDFFromModal()">📄 PDF出力</button>
-    </div>
-  </div>
-</div>
-
-<!-- PDF Hidden Area -->
-<div id="pdf-area"></div>
 
 <script>
-let baSections=[], generalImages=[], sectionCounter=0, currentModal=null;
-let lastGenData = null; // store last generated data for PDF
+let areas = [];
+let areaCounter = 0;
 
 // --- API Key ---
 function saveApiKey(){
-  const key=document.getElementById('api-key-input').value.trim();
-  const err=document.getElementById('api-error');
-  if(!key||!key.startsWith('sk-')){err.style.display='block';err.textContent='正しいAPIキーを入力してください（sk- で始まります）';return;}
-  localStorage.setItem('anthropic_api_key',key);
-  document.getElementById('api-screen').style.display='none';
-  document.getElementById('main-app').style.display='block';
+  const key = document.getElementById('api-key-input').value.trim();
+  const err = document.getElementById('api-error');
+  if(!key || !key.startsWith('sk-')){err.style.display='block';err.textContent='正しいAPIキーを入力してください（sk- で始まります）';return;}
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('api-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
   initApp();
 }
 function resetKey(){if(confirm('APIキーをリセットしますか？')){localStorage.removeItem('anthropic_api_key');location.reload();}}
-document.getElementById('api-key-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveApiKey();});
+document.getElementById('api-key-input').addEventListener('keydown', e=>{if(e.key==='Enter') saveApiKey();});
 
 function initApp(){
-  document.getElementById('report-date').value=new Date().toISOString().split('T')[0];
-  renderBASections(); renderSavedSites(); renderHistory();
+  document.getElementById('report-date').value = new Date().toISOString().split('T')[0];
+  if(!areas.length) addArea();
 }
-window.onload=()=>{
+
+window.onload = ()=>{
   if(localStorage.getItem('anthropic_api_key')){
-    document.getElementById('api-screen').style.display='none';
-    document.getElementById('main-app').style.display='block';
+    document.getElementById('api-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
     initApp();
   }
 };
 
 // --- Nav ---
 function showPage(p){
-  ['report','history'].forEach(n=>{
-    document.getElementById('page-'+n).classList.toggle('visible',n===p);
-    document.getElementById('tab-'+n).classList.toggle('active',n===p);
+  ['create','history'].forEach(n=>{
+    document.getElementById('page-'+n).classList.toggle('visible', n===p);
+    document.getElementById('tab-'+n).classList.toggle('active', n===p);
   });
-  if(p==='history') renderHistory();
+  if(p==='history') renderReports();
 }
 
-// --- Saved Sites ---
-function getSavedSites(){return JSON.parse(localStorage.getItem('saved_sites')||'[]');}
-function setSavedSites(s){localStorage.setItem('saved_sites',JSON.stringify(s));}
-function saveCurrentSite(){
-  const name=document.getElementById('site-name').value.trim();
-  if(!name){alert('現場名を入力してください');return;}
-  const site={id:Date.now(),name,reporter:document.getElementById('reporter').value,recipientEmail:document.getElementById('recipient-email').value,recipientName:document.getElementById('recipient-name').value,ccEmail:document.getElementById('cc-email').value,tone:document.getElementById('tone').value};
-  const sites=getSavedSites();
-  const idx=sites.findIndex(s=>s.name===name);
-  if(idx>=0){if(!confirm(`「${name}」を上書きしますか？`))return;sites[idx]=site;}else sites.push(site);
-  setSavedSites(sites); renderSavedSites(); alert(`「${name}」を保存しました！`);
-}
-function loadSite(id){
-  const s=getSavedSites().find(s=>s.id===id); if(!s) return;
-  document.getElementById('site-name').value=s.name||'';
-  document.getElementById('reporter').value=s.reporter||'';
-  document.getElementById('recipient-email').value=s.recipientEmail||'';
-  document.getElementById('recipient-name').value=s.recipientName||'';
-  document.getElementById('cc-email').value=s.ccEmail||'';
-  document.getElementById('tone').value=s.tone||'丁寧・フォーマル';
-  setStep(2);
-}
-function deleteSite(id){setSavedSites(getSavedSites().filter(s=>s.id!==id));renderSavedSites();}
-function renderSavedSites(){
-  const sites=getSavedSites();
-  const row=document.getElementById('saved-sites-row');
-  if(!sites.length){row.style.display='none';return;}
-  row.style.display='block';
-  document.getElementById('saved-sites').innerHTML=sites.map(s=>`<div class="site-chip" onclick="loadSite(${s.id})">🏗️ ${s.name}<button class="site-chip-del" onclick="event.stopPropagation();deleteSite(${s.id})">×</button></div>`).join('');
+// --- Areas ---
+function addArea(){
+  const id = areaCounter++;
+  areas.push({id, name:'', beforeImg:null, beforeDesc:'', afterImg:null, afterDesc:''});
+  renderAreas();
 }
 
-// --- Before/After ---
-function addBASection(){const id=sectionCounter++;baSections.push({id,beforeImg:null,afterImg:null,desc:''});renderBASections();setStep(2);}
-function renderBASections(){
-  const c=document.getElementById('ba-sections');
-  if(!baSections.length){c.innerHTML='<div style="text-align:center;color:var(--sub);font-size:13px;padding:8px 0;">まだ登録されていません</div>';return;}
-  c.innerHTML=baSections.map((sec,idx)=>`
-    <div class="ba-section-item">
-      <div class="ba-section-header"><div class="ba-section-title">箇所 ${idx+1}</div><button class="ba-remove-section" onclick="removeBASection(${sec.id})">×</button></div>
-      <div class="ba-grid">
-        <div><span class="ba-badge before">BEFORE</span>
-          ${sec.beforeImg?`<div class="ba-preview"><img src="${sec.beforeImg.dataUrl}"><button class="ba-preview-remove" onclick="clearBAImg(${sec.id},'before')">✕</button><div class="ba-preview-label before">施工前</div></div>`:`<div class="ba-upload"><input type="file" accept="image/*" onchange="handleBAImg(event,${sec.id},'before')"><div style="font-size:24px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工前</div></div>`}
+function escHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderAreas(){
+  const c = document.getElementById('areas-container');
+  if(!areas.length){c.innerHTML='';return;}
+  c.innerHTML = areas.map((a, idx)=>`
+    <div class="area-item">
+      <div class="area-header">
+        <div class="area-title">箇所 ${idx+1}</div>
+        <button class="area-remove" onclick="removeArea(${a.id})">×</button>
+      </div>
+      <input class="area-name-input" type="text" placeholder="箇所名（例：駐車場部分）" value="${escHtml(a.name)}" oninput="updateAreaField(${a.id},'name',this.value)">
+      <div class="area-grid">
+        <div>
+          <span class="ba-badge before">BEFORE</span>
+          ${a.beforeImg
+            ? `<div class="ba-preview"><img src="${a.beforeImg.dataUrl}"><button class="ba-preview-remove" onclick="clearImg(${a.id},'before')">✕</button><div class="ba-preview-label before">施工前</div></div>`
+            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'before')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工前写真</div></div>`
+          }
+          <textarea class="desc-textarea" placeholder="施工前の状況を入力..." oninput="updateAreaField(${a.id},'beforeDesc',this.value)">${escHtml(a.beforeDesc)}</textarea>
         </div>
-        <div><span class="ba-badge after">AFTER</span>
-          ${sec.afterImg?`<div class="ba-preview"><img src="${sec.afterImg.dataUrl}"><button class="ba-preview-remove" onclick="clearBAImg(${sec.id},'after')">✕</button><div class="ba-preview-label after">施工後</div></div>`:`<div class="ba-upload"><input type="file" accept="image/*" onchange="handleBAImg(event,${sec.id},'after')"><div style="font-size:24px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工後</div></div>`}
+        <div>
+          <span class="ba-badge after">AFTER</span>
+          ${a.afterImg
+            ? `<div class="ba-preview"><img src="${a.afterImg.dataUrl}"><button class="ba-preview-remove" onclick="clearImg(${a.id},'after')">✕</button><div class="ba-preview-label after">施工後</div></div>`
+            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'after')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工後写真</div></div>`
+          }
+          <textarea class="desc-textarea" placeholder="施工後の状況を入力..." oninput="updateAreaField(${a.id},'afterDesc',this.value)">${escHtml(a.afterDesc)}</textarea>
         </div>
       </div>
-      <input class="ba-desc-input" type="text" placeholder="箇所の説明（例：1階 床タイル工事）" value="${sec.desc}" oninput="updateBADesc(${sec.id},this.value)">
     </div>`).join('');
 }
-function handleBAImg(e,id,type){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=ev=>{const s=baSections.find(s=>s.id===id);if(s){s[type+'Img']={base64:ev.target.result.split(',')[1],dataUrl:ev.target.result,mtype:file.type};renderBASections();}};
+
+function removeArea(id){areas = areas.filter(a=>a.id!==id); renderAreas();}
+function updateAreaField(id, field, val){const a=areas.find(a=>a.id===id); if(a) a[field]=val;}
+
+function handleImg(e, id, type){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const a = areas.find(a=>a.id===id);
+    if(a){a[type+'Img']={base64:ev.target.result.split(',')[1], dataUrl:ev.target.result, mtype:file.type}; renderAreas();}
+  };
   reader.readAsDataURL(file);
 }
-function clearBAImg(id,type){const s=baSections.find(s=>s.id===id);if(s){s[type+'Img']=null;renderBASections();}}
-function removeBASection(id){baSections=baSections.filter(s=>s.id!==id);renderBASections();}
-function updateBADesc(id,val){const s=baSections.find(s=>s.id===id);if(s)s.desc=val;}
+function clearImg(id, type){const a=areas.find(a=>a.id===id); if(a){a[type+'Img']=null; renderAreas();}}
 
-// --- General ---
-function handleGeneral(e){
-  Array.from(e.target.files).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=ev=>{generalImages.push({base64:ev.target.result.split(',')[1],dataUrl:ev.target.result,mtype:file.type});renderGeneral();};
-    reader.readAsDataURL(file);
-  });
-}
-function renderGeneral(){document.getElementById('general-grid').innerHTML=generalImages.map((img,i)=>`<div class="preview-item"><img src="${img.dataUrl}"><button class="preview-remove" onclick="removeGeneral(${i})">✕</button></div>`).join('');}
-function removeGeneral(i){generalImages.splice(i,1);renderGeneral();}
+// --- Save & PDF ---
+function savePDF(){
+  const siteName = document.getElementById('site-name').value.trim() || '現場';
+  const date = document.getElementById('report-date').value;
+  const reporter = document.getElementById('reporter').value.trim() || '担当者';
+  const recipientEmail = document.getElementById('recipient-email').value.trim();
+  const recipientName = document.getElementById('recipient-name').value.trim();
+  const ccEmail = document.getElementById('cc-email').value.trim();
+  const tone = document.getElementById('tone').value;
+  const notes = document.getElementById('notes').value.trim();
+  const dateStr = date ? new Date(date).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'}) : '';
 
-// --- Steps ---
-function setStep(n){
-  [1,2,3].forEach(i=>{
-    document.getElementById('s'+i).className='step-dot'+(i<n?' done':i===n?' active':'');
-    document.getElementById('sn'+i).className='step-name'+(i<n?' done':i===n?' active':'');
-    document.getElementById('s'+i).textContent=i<n?'✓':String(i);
-  });
-}
+  const report = {
+    id: Date.now(),
+    siteName, date, dateStr, reporter, recipientEmail, recipientName, ccEmail, tone, notes,
+    savedAt: new Date().toISOString(),
+    areas: areas.map(a=>({
+      name: a.name,
+      beforeImg: a.beforeImg ? {dataUrl: a.beforeImg.dataUrl} : null,
+      afterImg: a.afterImg ? {dataUrl: a.afterImg.dataUrl} : null,
+      beforeDesc: a.beforeDesc,
+      afterDesc: a.afterDesc
+    }))
+  };
 
-// --- Generate ---
-async function generate(){
-  const apiKey=localStorage.getItem('anthropic_api_key');
-  if(!apiKey){resetKey();return;}
-  const siteName=document.getElementById('site-name').value||'現場';
-  const date=document.getElementById('report-date').value;
-  const reporter=document.getElementById('reporter').value||'担当者';
-  const recipientEmail=document.getElementById('recipient-email').value;
-  const recipientName=document.getElementById('recipient-name').value||'ご担当者様';
-  const ccEmail=document.getElementById('cc-email').value;
-  const tone=document.getElementById('tone').value;
-  const notes=document.getElementById('notes').value;
-
-  const btn=document.getElementById('gen-btn');
-  btn.disabled=true; btn.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';
-
-  const dateStr=date?new Date(date).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'}):'本日';
-  const subject=`【現場報告】${siteName} ${dateStr} 月次報告`;
-  const resultCard=document.getElementById('result-card');
-  resultCard.style.display='block';
-  document.getElementById('out-to').value=recipientEmail;
-  document.getElementById('out-subject').value=subject;
-  document.getElementById('out-body').value='生成中...';
-  if(ccEmail){document.getElementById('cc-row').style.display='flex';document.getElementById('out-cc').value=ccEmail;}
-  setStep(3);
-
-  const content=[];
-  const baInfo=[];
-  baSections.forEach((sec,idx)=>{
-    const label=sec.desc||`箇所${idx+1}`;
-    if(sec.beforeImg) content.push({type:'image',source:{type:'base64',media_type:sec.beforeImg.mtype||'image/jpeg',data:sec.beforeImg.base64}});
-    if(sec.afterImg)  content.push({type:'image',source:{type:'base64',media_type:sec.afterImg.mtype||'image/jpeg',data:sec.afterImg.base64}});
-    baInfo.push(`・${label}（ビフォー${sec.beforeImg?'あり':'なし'} / アフター${sec.afterImg?'あり':'なし'}）`);
-  });
-  generalImages.slice(0,2).forEach(img=>content.push({type:'image',source:{type:'base64',media_type:img.mtype||'image/jpeg',data:img.base64}}));
-  const baText=baInfo.length>0?`\nビフォーアフター箇所:\n${baInfo.join('\n')}`:'';
-  content.push({type:'text',text:`あなたは建設会社の現場担当者です。以下の情報と添付写真をもとに、取引先への月次現場報告メールの本文のみを作成してください。\n\n【情報】\n- 現場名：${siteName}\n- 報告日：${dateStr}\n- 報告者：${reporter}\n- 宛先：${recipientName}\n- トーン：${tone}${notes?`\n- 特記事項：${notes}`:''}${baText}\n\n【出力ルール】件名は出力しないでください。本文のみ出力してください。冒頭の挨拶（宛先名を使う）、工事状況の報告、${baInfo.length>0?'「■ 施工前後の変化」セクションで各箇所の変化を具体的に説明、':''}特記事項・今後の予定、結びの挨拶と署名（報告者名を使用）。改行を適切に使い読みやすく整えてください。`});
-
-  let bodyText='';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content}]})
-    });
-    const data=await res.json();
-    bodyText=data.error?'エラー: '+data.error.message:data.content.map(c=>c.text||'').join('');
-  }catch(e){bodyText='エラーが発生しました。APIキーとネットワーク接続をご確認ください。';}
+    const reports = getReports();
+    reports.unshift(report);
+    if(reports.length > 30) reports.pop();
+    localStorage.setItem('reports', JSON.stringify(reports));
+  }catch(e){
+    alert('ストレージ容量不足のため保存できませんでした。古いレポートを削除してください。');
+    return;
+  }
 
-  document.getElementById('out-body').value=bodyText;
-  btn.disabled=false; btn.innerHTML='✉️ AIでメールを自動生成する';
-  resultCard.scrollIntoView({behavior:'smooth',block:'start'});
+  openPrintWindow(report);
 
-  // Store for PDF
-  lastGenData={siteName,date,dateStr,reporter,recipientEmail,recipientName,ccEmail,subject,body:bodyText,baSections:JSON.parse(JSON.stringify(baSections.map(s=>({...s,beforeImg:s.beforeImg?{dataUrl:s.beforeImg.dataUrl}:null,afterImg:s.afterImg?{dataUrl:s.afterImg.dataUrl}:null}))))};
-
-  if(!bodyText.startsWith('エラー')) saveToHistory({siteName,date,reporter,recipientEmail,recipientName,ccEmail,subject,body:bodyText});
+  if(confirm('報告書を保存しました！フォームをリセットしますか？')){
+    resetForm();
+  }
 }
 
-// --- PDF Export ---
-function buildPDFHTML(data){
-  const baHTML = data.baSections && data.baSections.length > 0 ? `
-    <div class="pdf-section">
-      <div class="pdf-section-title">■ 施工前後の変化</div>
-      ${data.baSections.map((sec,idx)=>`
-        <div class="pdf-ba-section">
-          <div class="pdf-ba-label">箇所${idx+1}：${sec.desc||'（説明なし）'}</div>
-          <div class="pdf-ba-grid">
-            <div class="pdf-ba-slot">
-              <span class="pdf-ba-slot-label before">BEFORE　施工前</span><br>
-              ${sec.beforeImg?`<img class="pdf-ba-img" src="${sec.beforeImg.dataUrl}">`:'<div class="pdf-ba-no-img">写真なし</div>'}
-            </div>
-            <div class="pdf-ba-slot">
-              <span class="pdf-ba-slot-label after">AFTER　施工後</span><br>
-              ${sec.afterImg?`<img class="pdf-ba-img" src="${sec.afterImg.dataUrl}">`:'<div class="pdf-ba-no-img">写真なし</div>'}
-            </div>
+function resetForm(){
+  document.getElementById('site-name').value = '';
+  document.getElementById('report-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('reporter').value = '';
+  document.getElementById('recipient-email').value = '';
+  document.getElementById('recipient-name').value = '';
+  document.getElementById('cc-email').value = '';
+  document.getElementById('notes').value = '';
+  areas = []; areaCounter = 0; addArea();
+}
+
+// --- Reports Storage ---
+function getReports(){return JSON.parse(localStorage.getItem('reports') || '[]');}
+
+// --- Reports Render ---
+function renderReports(){
+  const reports = getReports();
+  const list = document.getElementById('reports-list');
+  const selectBar = document.getElementById('select-bar');
+  const mailSection = document.getElementById('mail-section');
+
+  if(!reports.length){
+    list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div>まだ報告書がありません。<br>「作成」タブから報告書を作成してください。</div>`;
+    selectBar.style.display = 'none';
+    mailSection.style.display = 'none';
+    return;
+  }
+
+  selectBar.style.display = 'flex';
+  mailSection.style.display = 'block';
+
+  list.innerHTML = reports.map(r=>{
+    const d = new Date(r.savedAt);
+    const ds = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+    const areaNames = r.areas.map(a=>a.name||'（名称なし）').join('、');
+    return `<div class="report-item" id="ri-${r.id}">
+      <div class="report-item-row">
+        <input type="checkbox" class="report-checkbox" onchange="updateSelection()" data-id="${r.id}">
+        <div class="report-info">
+          <div class="report-title">🏗️ ${r.siteName}</div>
+          <div class="report-meta">📅 ${r.dateStr||r.date} ｜ 👤 ${r.reporter} ｜ 📍 ${r.areas.length}箇所</div>
+          <div class="report-area-names">${areaNames}</div>
+          <div class="report-actions">
+            <button class="small-btn" onclick="rePDF(${r.id})">📄 PDF再出力</button>
+            <button class="small-btn danger" onclick="deleteReport(${r.id})">🗑️ 削除</button>
           </div>
         </div>
-      `).join('')}
-    </div>` : '';
-
-  return `
-    <div class="pdf-page">
-      <div class="pdf-header">
-        <div class="pdf-header-title">現場月次報告書</div>
-        <div class="pdf-header-meta">
-          <span>現場名：${data.siteName}</span>
-          <span>報告日：${data.dateStr||data.date}</span>
-          <span>報告者：${data.reporter}</span>
-      </div>
-      <div class="pdf-section">
-        <div class="pdf-section-title">■ 送付先情報</div>
-        <div class="pdf-info-grid">
-          <div class="pdf-info-item"><div class="pdf-info-label">宛先</div><div class="pdf-info-val">${data.recipientName||''}</div></div>
-          <div class="pdf-info-item"><div class="pdf-info-label">メールアドレス</div><div class="pdf-info-val">${data.recipientEmail||''}</div></div>
-        </div>
-      </div>
-      <div class="pdf-section">
-        <div class="pdf-section-title">■ 報告内容</div>
-        <div class="pdf-body">${data.body||''}</div>
-      </div>
-      ${baHTML}
-      <div class="pdf-footer">
-        <span>${data.siteName} 月次報告書</span>
-        <span>報告者：${data.reporter}</span>
-        <span>${data.dateStr||data.date}</span>
       </div>
     </div>`;
+  }).join('');
+
+  updateSelection();
 }
 
-function openPrintWindow(data){
-  const pdfStyles = `
+function updateSelection(){
+  const allCbs = document.querySelectorAll('.report-checkbox');
+  const checked = document.querySelectorAll('.report-checkbox:checked');
+  const count = checked.length;
+  const total = allCbs.length;
+  document.getElementById('select-count').textContent = `${count}/${total} 件選択中`;
+  const allCb = document.getElementById('select-all-cb');
+  allCb.checked = count === total && total > 0;
+  allCb.indeterminate = count > 0 && count < total;
+  allCbs.forEach(cb=>{
+    const item = cb.closest('.report-item');
+    if(item) item.classList.toggle('selected', cb.checked);
+  });
+  const mailGenBtn = document.getElementById('mail-gen-btn');
+  if(mailGenBtn) mailGenBtn.disabled = count === 0;
+}
+
+function toggleSelectAll(checked){
+  document.querySelectorAll('.report-checkbox').forEach(cb=>cb.checked=checked);
+  updateSelection();
+}
+
+function deleteReport(id){
+  if(!confirm('この報告書を削除しますか？')) return;
+  localStorage.setItem('reports', JSON.stringify(getReports().filter(r=>r.id!==id)));
+  document.getElementById('mail-result-card').style.display = 'none';
+  renderReports();
+}
+
+function rePDF(id){
+  const r = getReports().find(r=>r.id===id);
+  if(r) openPrintWindow(r);
+}
+
+// --- Email Generation ---
+async function generateEmail(){
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  if(!apiKey){resetKey();return;}
+  const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
+  if(!selected.length){alert('レポートを1件以上選択してください');return;}
+  const reports = getReports().filter(r=>selected.includes(r.id));
+
+  const btn = document.getElementById('mail-gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+
+  const first = reports[0];
+  const reportSummaries = reports.map((r, i)=>{
+    const areaSummary = r.areas.map(a=>`  【${a.name||'箇所'}】\n  施工前：${a.beforeDesc||'（記載なし）'}\n  施工後：${a.afterDesc||'（記載なし）'}`).join('\n');
+    return `■ 報告書${i+1}：${r.siteName}（${r.dateStr||r.date}）\n${areaSummary}${r.notes?'\n  特記事項：'+r.notes:''}`;
+  }).join('\n\n');
+
+  const prompt = `あなたは建設・管理会社の現場担当者です。以下の現場報告書の内容をもとに、取引先への送付メールの本文を作成してください。
+
+【宛先】${first.recipientName||'ご担当者様'}
+【報告者】${first.reporter}
+【トーン】${first.tone||'丁寧・フォーマル'}
+【報告内容】
+${reportSummaries}
+
+【出力ルール】
+- 件名は出力しないでください。本文のみ出力してください。
+- 冒頭の挨拶（宛先名を使う）
+- 各報告書の概要を簡潔にまとめる
+- 「別添の報告書をご確認ください」旨を含める
+- 特記事項があれば触れる
+- 結びの挨拶と署名（報告者名を使用）
+- 改行を適切に使い読みやすく整えてください`;
+
+  let bodyText = '';
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method: 'POST',
+      headers: {'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1200, messages:[{role:'user',content:prompt}]})
+    });
+    const data = await res.json();
+    bodyText = data.error ? 'エラー: '+data.error.message : data.content.map(c=>c.text||'').join('');
+  }catch(e){bodyText='エラーが発生しました。APIキーとネットワーク接続をご確認ください。';}
+
+  document.getElementById('email-body-out').value = bodyText;
+  const resultCard = document.getElementById('mail-result-card');
+  resultCard.style.display = 'block';
+  resultCard.scrollIntoView({behavior:'smooth', block:'start'});
+  btn.disabled = false;
+  btn.innerHTML = '✉️ 選択したレポートのメール文を生成';
+}
+
+function copyEmailBody(){
+  const text = document.getElementById('email-body-out').value;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    setTimeout(()=>btn.innerHTML='📋 メール文章をコピー', 2000);
+  });
+}
+
+function downloadSelectedPDFs(){
+  const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
+  const reports = getReports().filter(r=>selected.includes(r.id));
+  if(!reports.length){alert('レポートを選択してください');return;}
+  reports.forEach((r, i)=>setTimeout(()=>openPrintWindow(r), i*800));
+}
+
+// --- PDF Generation ---
+function buildReportHTML(r){
+  const areasHTML = r.areas.map((a, idx)=>`
+    <div class="pdf-area">
+      <div class="pdf-area-title">【${a.name||`箇所${idx+1}`}】</div>
+      <div class="pdf-ba-grid">
+        <div class="pdf-ba-slot">
+          <div class="pdf-ba-label before">BEFORE　施工前</div>
+          ${a.beforeImg ? `<img class="pdf-ba-img" src="${a.beforeImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
+          ${a.beforeDesc ? `<div class="pdf-desc">${a.beforeDesc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
+        </div>
+        <div class="pdf-ba-slot">
+          <div class="pdf-ba-label after">AFTER　施工後</div>
+          ${a.afterImg ? `<img class="pdf-ba-img" src="${a.afterImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
+          ${a.afterDesc ? `<div class="pdf-desc">${a.afterDesc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  return `<div class="pdf-page">
+    <div class="pdf-header">
+      <div class="pdf-header-title">現場作業報告書</div>
+      <div class="pdf-header-meta">
+        <span>現場名：${r.siteName}</span>
+        <span>作業日：${r.dateStr||r.date}</span>
+        <span>報告者：${r.reporter}</span>
+      </div>
+    </div>
+    ${r.recipientName ? `<div class="pdf-to">提出先：${r.recipientName}</div>` : ''}
+    <div class="pdf-section">
+      <div class="pdf-section-title">■ 施工前後の変化</div>
+      ${areasHTML}
+    </div>
+    ${r.notes ? `<div class="pdf-section"><div class="pdf-section-title">■ 特記事項</div><div class="pdf-notes">${r.notes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div></div>` : ''}
+    <div class="pdf-footer">
+      <span>${r.siteName}</span>
+      <span>報告者：${r.reporter}</span>
+      <span>${r.dateStr||r.date}</span>
+    </div>
+  </div>`;
+}
+
+function openPrintWindow(r){
+  const css = `
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Noto Sans JP',sans-serif;color:#0F1923;padding:0;margin:0;}
-    .pdf-page{padding:32px 36px;max-width:100%;}
-    .pdf-header{border-bottom:3px solid #1B4FD8;padding-bottom:16px;margin-bottom:24px;}
-    .pdf-header-title{font-size:22px;font-weight:900;color:#1B4FD8;margin-bottom:4px;}
+    body{font-family:'Noto Sans JP',sans-serif;color:#0F1923;}
+    .pdf-page{padding:28px 32px;}
+    .pdf-header{border-bottom:3px solid #1B4FD8;padding-bottom:14px;margin-bottom:20px;}
+    .pdf-header-title{font-size:20px;font-weight:900;color:#1B4FD8;margin-bottom:6px;}
     .pdf-header-meta{font-size:12px;color:#6B7A8D;display:flex;gap:20px;flex-wrap:wrap;}
-    .pdf-section{margin-bottom:24px;}
-    .pdf-section-title{font-size:14px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:12px;}
-    .pdf-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:16px;}
-    .pdf-info-item{font-size:12px;}
-    .pdf-info-label{color:#6B7A8D;font-weight:700;font-size:10px;letter-spacing:.5px;margin-bottom:2px;}
-    .pdf-info-val{color:#0F1923;font-weight:500;}
-    .pdf-body{font-size:13px;line-height:1.9;white-space:pre-wrap;color:#0F1923;}
-    .pdf-ba-section{margin-bottom:20px;}
-    .pdf-ba-label{font-size:12px;font-weight:700;color:#3A4A5C;margin-bottom:8px;}
-    .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .pdf-ba-slot-label{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
-    .pdf-ba-slot-label.before{background:#FEE2E2;color:#DC2626;}
-    .pdf-ba-slot-label.after{background:#DCFCE7;color:#16A34A;}
-    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;}
-    .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F1EFE8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;}
-    .pdf-footer{border-top:1px solid #E2E8F0;padding-top:12px;margin-top:24px;font-size:11px;color:#6B7A8D;display:flex;justify-content:space-between;}
+    .pdf-to{font-size:13px;color:#0F1923;margin-bottom:16px;}
+    .pdf-section{margin-bottom:20px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:14px;}
+    .pdf-area{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #E2E8F0;}
+    .pdf-area:last-child{border-bottom:none;}
+    .pdf-area-title{font-size:13px;font-weight:700;color:#3A4A5C;margin-bottom:10px;}
+    .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .pdf-ba-label{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
+    .pdf-ba-label.before{background:#FEE2E2;color:#DC2626;}
+    .pdf-ba-label.after{background:#DCFCE7;color:#16A34A;}
+    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;}
+    .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F5F5F5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;margin-bottom:6px;}
+    .pdf-desc{font-size:12px;color:#3A4A5C;line-height:1.7;}
+    .pdf-notes{font-size:12px;color:#3A4A5C;line-height:1.8;}
+    .pdf-footer{border-top:1px solid #E2E8F0;padding-top:10px;margin-top:20px;font-size:11px;color:#6B7A8D;display:flex;justify-content:space-between;}
   `;
   const html = `<!DOCTYPE html><html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>現場月次報告書</title>
-    <style>${pdfStyles}</style>
-  </head><body>${buildPDFHTML(data)}</body></html>`;
+    <title>${r.siteName} 報告書</title>
+    <style>${css}</style>
+  </head><body>${buildReportHTML(r)}</body></html>`;
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const w = window.open(url, '_blank');
   if(w){
     w.onload = ()=>{ w.focus(); setTimeout(()=>{ w.print(); URL.revokeObjectURL(url); }, 500); };
   } else {
-    // fallback if popup blocked
-    document.getElementById('pdf-area').innerHTML = buildPDFHTML(data);
-    window.print();
+    alert('ポップアップがブロックされました。ブラウザのポップアップ許可設定をご確認ください。');
     URL.revokeObjectURL(url);
   }
-}
-
-function exportPDF(){
-  const body = document.getElementById('out-body').value;
-  const subject = document.getElementById('out-subject').value;
-  if(!lastGenData&&!body){alert('先にメールを生成してください');return;}
-  const data = {...(lastGenData||{}), body, subject, recipientEmail: document.getElementById('out-to').value};
-  openPrintWindow(data);
-}
-
-function exportPDFFromModal(){
-  if(!currentModal) return;
-  openPrintWindow(currentModal);
-}
-
-// --- History ---
-function getHistory(){return JSON.parse(localStorage.getItem('mail_history')||'[]');}
-function setHistory(h){localStorage.setItem('mail_history',JSON.stringify(h));}
-function saveToHistory(entry){
-  const h=getHistory();
-  h.unshift({...entry,id:Date.now(),savedAt:new Date().toISOString()});
-  if(h.length>50)h.pop();
-  setHistory(h);
-}
-function renderHistory(){
-  const list=document.getElementById('history-list');
-  const h=getHistory();
-  if(!h.length){list.innerHTML=`<div class="history-empty"><div class="history-empty-icon">📭</div>まだ履歴がありません。<br>メールを生成すると自動で保存されます。</div>`;return;}
-  list.innerHTML=h.map(item=>{
-    const d=new Date(item.savedAt);
-    const dateStr=d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
-    const preview=item.body?item.body.slice(0,80).replace(/\n/g,' ')+'...':'';
-    return `<div class="history-item" onclick="openModal(${item.id})">
-      <div class="history-item-header"><div class="history-item-title">🏗️ ${item.siteName}</div><div class="history-item-date">${dateStr}</div></div>
-      <div class="history-item-to">📧 ${item.recipientEmail||item.recipientName||'—'}</div>
-      <div class="history-item-preview">${preview}</div>
-      <div class="history-item-footer"><span class="history-badge">✅ 送信済み</span><button class="history-del" onclick="event.stopPropagation();deleteHistory(${item.id})">削除</button></div>
-    </div>`;
-  }).join('');
-}
-function deleteHistory(id){if(!confirm('この履歴を削除しますか？'))return;setHistory(getHistory().filter(h=>h.id!==id));renderHistory();}
-function clearAllHistory(){if(!confirm('全ての履歴を削除しますか？'))return;localStorage.removeItem('mail_history');renderHistory();}
-
-// --- Modal ---
-function openModal(id){
-  const item=getHistory().find(h=>h.id===id);if(!item)return;
-  currentModal=item;
-  document.getElementById('modal-title').textContent=`🏗️ ${item.siteName}`;
-  document.getElementById('modal-to').textContent=item.recipientEmail||'—';
-  document.getElementById('modal-subject').textContent=item.subject||'—';
-  document.getElementById('modal-body').textContent=item.body||'—';
-  document.getElementById('modal-overlay').classList.add('visible');
-}
-function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
-function closeModalDirect(){document.getElementById('modal-overlay').classList.remove('visible');currentModal=null;}
-function copyFromModal(){if(!currentModal)return;navigator.clipboard.writeText(`宛先: ${currentModal.recipientEmail}\n件名: ${currentModal.subject}\n\n${currentModal.body}`).then(()=>alert('コピーしました！'));}
-function openOutlookFromModal(){
-  if(!currentModal)return;
-  const params=new URLSearchParams();
-  if(currentModal.ccEmail)params.set('cc',currentModal.ccEmail);
-  params.set('subject',currentModal.subject);params.set('body',currentModal.body);
-  window.location.href=`mailto:${currentModal.recipientEmail}?${params.toString()}`;
-}
-
-// --- Outlook / Copy ---
-function openOutlook(){
-  const to=document.getElementById('out-to').value,cc=document.getElementById('out-cc').value;
-  const subject=document.getElementById('out-subject').value,body=document.getElementById('out-body').value;
-  const params=new URLSearchParams();
-  if(cc)params.set('cc',cc);params.set('subject',subject);params.set('body',body);
-  window.location.href=`mailto:${to}?${params.toString()}`;
-}
-function copyEmail(){
-  const to=document.getElementById('out-to').value,cc=document.getElementById('out-cc').value;
-  const subject=document.getElementById('out-subject').value,body=document.getElementById('out-body').value;
-  let text=`宛先: ${to}\n`;if(cc)text+=`CC: ${cc}\n`;
-  text+=`件名: ${subject}\n\n${body}`;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn=document.querySelector('.action-btn');
-    btn.textContent='✅ コピーしました！';setTimeout(()=>btn.textContent='📋 コピー',2000);
-  });
 }
 </script>
 </body>
