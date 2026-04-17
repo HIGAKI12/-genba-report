@@ -270,13 +270,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
         <div class="form-group"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">工事の進捗状況</div>
-          <select class="form-select" id="progress">
-            <option>着工準備中</option><option selected>基礎工事中</option><option>躯体工事中</option>
-            <option>仕上げ工事中</option><option>竣工検査中</option><option>完成・引渡し</option>
-          </select>
-        </div>
-        <div class="form-group"><div class="form-label">メールのトーン</div>
+        <div class="form-group full"><div class="form-label">メールのトーン</div>
           <select class="form-select" id="tone"><option>丁寧・フォーマル</option><option>簡潔・ビジネス</option></select>
         </div>
       </div>
@@ -472,7 +466,6 @@ async function generate(){
   const recipientEmail=document.getElementById('recipient-email').value;
   const recipientName=document.getElementById('recipient-name').value||'ご担当者様';
   const ccEmail=document.getElementById('cc-email').value;
-  const progress=document.getElementById('progress').value;
   const tone=document.getElementById('tone').value;
   const notes=document.getElementById('notes').value;
 
@@ -499,7 +492,7 @@ async function generate(){
   });
   generalImages.slice(0,2).forEach(img=>content.push({type:'image',source:{type:'base64',media_type:img.mtype||'image/jpeg',data:img.base64}}));
   const baText=baInfo.length>0?`\nビフォーアフター箇所:\n${baInfo.join('\n')}`:'';
-  content.push({type:'text',text:`あなたは建設会社の現場担当者です。以下の情報と添付写真をもとに、取引先への月次現場報告メールの本文のみを作成してください。\n\n【情報】\n- 現場名：${siteName}\n- 報告日：${dateStr}\n- 報告者：${reporter}\n- 宛先：${recipientName}\n- 工事進捗：${progress}\n- トーン：${tone}${notes?`\n- 特記事項：${notes}`:''}${baText}\n\n【出力ルール】件名は出力しないでください。本文のみ出力してください。冒頭の挨拶（宛先名を使う）、工事進捗の報告、${baInfo.length>0?'「■ 施工前後の変化」セクションで各箇所の変化を具体的に説明、':''}特記事項・今後の予定、結びの挨拶と署名（報告者名を使用）。改行を適切に使い読みやすく整えてください。`});
+  content.push({type:'text',text:`あなたは建設会社の現場担当者です。以下の情報と添付写真をもとに、取引先への月次現場報告メールの本文のみを作成してください。\n\n【情報】\n- 現場名：${siteName}\n- 報告日：${dateStr}\n- 報告者：${reporter}\n- 宛先：${recipientName}\n- トーン：${tone}${notes?`\n- 特記事項：${notes}`:''}${baText}\n\n【出力ルール】件名は出力しないでください。本文のみ出力してください。冒頭の挨拶（宛先名を使う）、工事状況の報告、${baInfo.length>0?'「■ 施工前後の変化」セクションで各箇所の変化を具体的に説明、':''}特記事項・今後の予定、結びの挨拶と署名（報告者名を使用）。改行を適切に使い読みやすく整えてください。`});
 
   let bodyText='';
   try{
@@ -517,7 +510,7 @@ async function generate(){
   resultCard.scrollIntoView({behavior:'smooth',block:'start'});
 
   // Store for PDF
-  lastGenData={siteName,date,dateStr,reporter,recipientEmail,recipientName,ccEmail,progress,subject,body:bodyText,baSections:JSON.parse(JSON.stringify(baSections.map(s=>({...s,beforeImg:s.beforeImg?{dataUrl:s.beforeImg.dataUrl}:null,afterImg:s.afterImg?{dataUrl:s.afterImg.dataUrl}:null}))))};
+  lastGenData={siteName,date,dateStr,reporter,recipientEmail,recipientName,ccEmail,subject,body:bodyText,baSections:JSON.parse(JSON.stringify(baSections.map(s=>({...s,beforeImg:s.beforeImg?{dataUrl:s.beforeImg.dataUrl}:null,afterImg:s.afterImg?{dataUrl:s.afterImg.dataUrl}:null}))))};
 
   if(!bodyText.startsWith('エラー')) saveToHistory({siteName,date,reporter,recipientEmail,recipientName,ccEmail,subject,body:bodyText});
 }
@@ -552,8 +545,6 @@ function buildPDFHTML(data){
           <span>現場名：${data.siteName}</span>
           <span>報告日：${data.dateStr||data.date}</span>
           <span>報告者：${data.reporter}</span>
-          <span>進捗：${data.progress||''}</span>
-        </div>
       </div>
       <div class="pdf-section">
         <div class="pdf-section-title">■ 送付先情報</div>
@@ -575,25 +566,62 @@ function buildPDFHTML(data){
     </div>`;
 }
 
+function openPrintWindow(data){
+  const pdfStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans JP',sans-serif;color:#0F1923;padding:0;margin:0;}
+    .pdf-page{padding:32px 36px;max-width:100%;}
+    .pdf-header{border-bottom:3px solid #1B4FD8;padding-bottom:16px;margin-bottom:24px;}
+    .pdf-header-title{font-size:22px;font-weight:900;color:#1B4FD8;margin-bottom:4px;}
+    .pdf-header-meta{font-size:12px;color:#6B7A8D;display:flex;gap:20px;flex-wrap:wrap;}
+    .pdf-section{margin-bottom:24px;}
+    .pdf-section-title{font-size:14px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:12px;}
+    .pdf-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:16px;}
+    .pdf-info-item{font-size:12px;}
+    .pdf-info-label{color:#6B7A8D;font-weight:700;font-size:10px;letter-spacing:.5px;margin-bottom:2px;}
+    .pdf-info-val{color:#0F1923;font-weight:500;}
+    .pdf-body{font-size:13px;line-height:1.9;white-space:pre-wrap;color:#0F1923;}
+    .pdf-ba-section{margin-bottom:20px;}
+    .pdf-ba-label{font-size:12px;font-weight:700;color:#3A4A5C;margin-bottom:8px;}
+    .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .pdf-ba-slot-label{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
+    .pdf-ba-slot-label.before{background:#FEE2E2;color:#DC2626;}
+    .pdf-ba-slot-label.after{background:#DCFCE7;color:#16A34A;}
+    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;}
+    .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F1EFE8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;}
+    .pdf-footer{border-top:1px solid #E2E8F0;padding-top:12px;margin-top:24px;font-size:11px;color:#6B7A8D;display:flex;justify-content:space-between;}
+  `;
+  const html = `<!DOCTYPE html><html lang="ja"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>現場月次報告書</title>
+    <style>${pdfStyles}</style>
+  </head><body>${buildPDFHTML(data)}</body></html>`;
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if(w){
+    w.onload = ()=>{ w.focus(); setTimeout(()=>{ w.print(); URL.revokeObjectURL(url); }, 500); };
+  } else {
+    // fallback if popup blocked
+    document.getElementById('pdf-area').innerHTML = buildPDFHTML(data);
+    window.print();
+    URL.revokeObjectURL(url);
+  }
+}
+
 function exportPDF(){
-  // Use current edited values from form
   const body = document.getElementById('out-body').value;
   const subject = document.getElementById('out-subject').value;
   if(!lastGenData&&!body){alert('先にメールを生成してください');return;}
-  const data = {
-    ...(lastGenData||{}),
-    body,
-    subject,
-    recipientEmail: document.getElementById('out-to').value,
-  };
-  document.getElementById('pdf-area').innerHTML = buildPDFHTML(data);
-  setTimeout(()=>window.print(), 200);
+  const data = {...(lastGenData||{}), body, subject, recipientEmail: document.getElementById('out-to').value};
+  openPrintWindow(data);
 }
 
 function exportPDFFromModal(){
   if(!currentModal) return;
-  document.getElementById('pdf-area').innerHTML = buildPDFHTML(currentModal);
-  setTimeout(()=>window.print(), 200);
+  openPrintWindow(currentModal);
 }
 
 // --- History ---
