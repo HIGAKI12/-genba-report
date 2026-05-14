@@ -97,7 +97,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .report-item{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:16px 18px;margin-bottom:10px;transition:all .2s;}
 .report-item.selected{border-color:var(--blue);background:var(--blue2);}
 .report-item-row{display:flex;align-items:flex-start;gap:12px;}
-.report-checkbox{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;margin-top:3px;}
 .report-info{flex:1;}
 .report-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:3px;}
 .report-meta{font-size:11px;color:var(--sub);margin-bottom:4px;}
@@ -107,14 +106,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .small-btn:hover{background:var(--blue2);border-color:var(--blue3);}
 .small-btn.danger{color:var(--red);}
 .small-btn.danger:hover{background:var(--red2);border-color:var(--red);}
-.mail-card{display:none;}
-.email-body-area{width:100%;min-height:300px;font-family:'Noto Sans JP',sans-serif;font-size:13px;line-height:1.9;border:1.5px solid #E2E8F0;border-radius:8px;padding:12px;color:var(--dark);outline:none;resize:vertical;background:#fff;margin-bottom:12px;}
-.email-body-area:focus{border-color:var(--blue);}
-.copy-btn{width:100%;padding:14px;border:none;border-radius:var(--radius-sm);background:var(--green);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;}
-.copy-btn:hover{background:#15803D;}
-.pdf-dl-btn{width:100%;padding:13px;border:1.5px solid var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
-.pdf-dl-btn:hover{background:#dce9ff;}
-.note-text{font-size:11px;color:var(--sub);margin-top:8px;text-align:center;line-height:1.6;}
 .loading-dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin:0 3px;animation:ld .9s infinite;}
 .loading-dots span:nth-child(2){animation-delay:.2s;}
 .loading-dots span:nth-child(3){animation-delay:.4s;}
@@ -144,7 +135,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
       <div class="nav-logo">🏗️ 現場報告</div>
       <div class="nav-tabs">
         <button class="nav-tab active" id="tab-create" onclick="showPage('create')">作成</button>
-        <button class="nav-tab" id="tab-history" onclick="showPage('history')">履歴・メール</button>
+        <button class="nav-tab" id="tab-history" onclick="showPage('history')">履歴</button>
       </div>
       <span class="nav-key" onclick="resetKey()">🔑</span>
     </div>
@@ -192,18 +183,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
       </div>
     </div>
 
-    <!-- 取引先情報（メール用） -->
+    <!-- 提出先（PDF記載用） -->
     <div class="card">
-      <div class="card-title">✉️ 取引先情報（メール送信用）</div>
+      <div class="card-title">📬 提出先（PDF記載用）</div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">管理会社名・宛先名</div><input class="form-input" id="recipient-name" placeholder="例：三和住宅株式会社 御中" type="text"></div>
-        <div class="form-group"><div class="form-label">取引先メールアドレス</div><input class="form-input" id="recipient-email" placeholder="例：tanaka@example.com" type="email"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
-        <div class="form-group"><div class="form-label">メールのトーン</div>
-          <select class="form-select" id="tone"><option>丁寧・フォーマル</option><option>簡潔・ビジネス</option></select>
-        </div>
+        <div class="form-group full"><div class="form-label">管理会社名・宛先名</div><input class="form-input" id="recipient-name" placeholder="例：三和住宅株式会社 御中" type="text"></div>
       </div>
     </div>
 
@@ -223,30 +207,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
     <button class="gen-btn" onclick="savePDF()">📄 PDF報告書を出力・保存</button>
   </div>
 
-  <!-- 履歴・メールページ -->
+  <!-- 履歴ページ -->
   <div class="page" id="page-history">
     <div style="height:16px;"></div>
-    <div id="select-bar" class="select-bar" style="display:none;">
-      <label class="select-bar-left">
-        <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--blue);">
-        全て選択
-      </label>
-      <span class="select-count" id="select-count"></span>
-    </div>
     <div id="reports-list"></div>
-    <div id="mail-section" style="display:none;">
-      <div class="card">
-        <div class="card-title">✉️ メール文章を生成</div>
-        <button class="gen-btn" id="mail-gen-btn" onclick="generateEmail()" style="margin-bottom:0;">✉️ 選択したレポートのメール文を生成</button>
-      </div>
-      <div class="card mail-card" id="mail-result-card">
-        <div class="card-title" style="color:var(--green);">✅ メール文章が生成されました</div>
-        <textarea class="email-body-area" id="email-body-out"></textarea>
-        <button class="copy-btn" onclick="copyEmailBody()">📋 メール文章をコピー</button>
-        <button class="pdf-dl-btn" onclick="downloadSelectedPDFs()">📄 選択したPDFをダウンロード</button>
-        <div class="note-text">ダウンロードしたPDFをメールに添付してお送りください</div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -421,17 +385,13 @@ function savePDF(){
   const workType = document.getElementById('work-type').value;
   const nextDate = document.getElementById('next-date').value.trim();
   const reporter = document.getElementById('reporter').value.trim() || '担当者';
-  const recipientEmail = document.getElementById('recipient-email').value.trim();
   const recipientName = document.getElementById('recipient-name').value.trim();
-  const ccEmail = document.getElementById('cc-email').value.trim();
-  const tone = document.getElementById('tone').value;
   const notes = document.getElementById('notes').value.trim();
   const dateStr = date ? new Date(date).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'}) : '';
 
   const report = {
     id: Date.now(), siteName, siteAddress, date, dateStr, workType, nextDate,
-    reporter, companyName, companyPhone,
-    recipientEmail, recipientName, ccEmail, tone, notes,
+    reporter, companyName, companyPhone, recipientName, notes,
     savedAt: new Date().toISOString(),
     areas: areas.map(a=>({
       name: a.name,
@@ -461,9 +421,7 @@ function resetForm(){
   document.getElementById('report-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('next-date').value = '';
   document.getElementById('reporter').value = '';
-  document.getElementById('recipient-email').value = '';
   document.getElementById('recipient-name').value = '';
-  document.getElementById('cc-email').value = '';
   document.getElementById('notes').value = '';
   areas = []; areaCounter = 0; addArea();
 }
@@ -474,120 +432,35 @@ function getReports(){return JSON.parse(localStorage.getItem('reports') || '[]')
 function renderReports(){
   const reports = getReports();
   const list = document.getElementById('reports-list');
-  const selectBar = document.getElementById('select-bar');
-  const mailSection = document.getElementById('mail-section');
   if(!reports.length){
     list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div>まだ報告書がありません。<br>「作成」タブから報告書を作成してください。</div>`;
-    selectBar.style.display = 'none'; mailSection.style.display = 'none'; return;
+    return;
   }
-  selectBar.style.display = 'flex'; mailSection.style.display = 'block';
   list.innerHTML = reports.map(r=>{
     const d = new Date(r.savedAt);
     const ds = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
     const areaNames = r.areas.map(a=>a.name||'（名称なし）').join('、');
     return `<div class="report-item" id="ri-${r.id}">
-      <div class="report-item-row">
-        <input type="checkbox" class="report-checkbox" onchange="updateSelection()" data-id="${r.id}">
-        <div class="report-info">
-          <div class="report-title">🏠 ${r.siteName}　<span style="font-size:11px;font-weight:600;color:var(--blue);">${r.workType||''}</span></div>
-          <div class="report-meta">📅 ${r.dateStr||r.date} ｜ 👤 ${r.reporter} ｜ 📍 ${r.areas.length}箇所</div>
-          <div class="report-area-names">${areaNames}</div>
-          <div class="report-actions">
-            <button class="small-btn" onclick="rePDF(${r.id})">📄 PDF再出力</button>
-            <button class="small-btn danger" onclick="deleteReport(${r.id})">🗑️ 削除</button>
-          </div>
+      <div class="report-info">
+        <div class="report-title">🏠 ${r.siteName}　<span style="font-size:11px;font-weight:600;color:var(--blue);">${r.workType||''}</span></div>
+        <div class="report-meta">📅 ${r.dateStr||r.date} ｜ 👤 ${r.reporter} ｜ 📍 ${r.areas.length}箇所</div>
+        <div class="report-area-names">${areaNames}</div>
+        <div class="report-actions">
+          <button class="small-btn" onclick="rePDF(${r.id})">📄 PDF保存</button>
+          <button class="small-btn danger" onclick="deleteReport(${r.id})">🗑️ 削除</button>
         </div>
       </div>
     </div>`;
   }).join('');
-  updateSelection();
 }
 
-function updateSelection(){
-  const allCbs = document.querySelectorAll('.report-checkbox');
-  const checked = document.querySelectorAll('.report-checkbox:checked');
-  const count = checked.length; const total = allCbs.length;
-  document.getElementById('select-count').textContent = `${count}/${total} 件選択中`;
-  const allCb = document.getElementById('select-all-cb');
-  allCb.checked = count===total && total>0;
-  allCb.indeterminate = count>0 && count<total;
-  allCbs.forEach(cb=>{ const item=cb.closest('.report-item'); if(item) item.classList.toggle('selected',cb.checked); });
-  const btn = document.getElementById('mail-gen-btn');
-  if(btn) btn.disabled = count===0;
-}
-function toggleSelectAll(checked){ document.querySelectorAll('.report-checkbox').forEach(cb=>cb.checked=checked); updateSelection(); }
 function deleteReport(id){
   if(!confirm('この報告書を削除しますか？')) return;
   localStorage.setItem('reports', JSON.stringify(getReports().filter(r=>r.id!==id)));
-  document.getElementById('mail-result-card').style.display = 'none';
   renderReports();
 }
 function rePDF(id){ const r=getReports().find(r=>r.id===id); if(r) openPrintWindow(r); }
 
-// --- Email Generation ---
-async function generateEmail(){
-  const apiKey = localStorage.getItem('anthropic_api_key');
-  if(!apiKey){resetKey();return;}
-  const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
-  if(!selected.length){alert('レポートを1件以上選択してください');return;}
-  const reports = getReports().filter(r=>selected.includes(r.id));
-  const btn = document.getElementById('mail-gen-btn');
-  btn.disabled = true; btn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-  const first = reports[0];
-  const summaries = reports.map((r,i)=>{
-    const areas = r.areas.map(a=>`  【${a.name||'箇所'}】\n  施工前：${a.beforeDesc||'（記載なし）'}\n  施工後：${a.afterDesc||'（記載なし）'}`).join('\n');
-    return `■ ${r.siteName}（${r.dateStr||r.date}・${r.workType||''}）\n${areas}${r.notes?'\n  特記事項：'+r.notes:''}${r.nextDate?'\n  次回予定：'+r.nextDate:''}`;
-  }).join('\n\n');
-  const prompt = `あなたは清掃・管理会社の担当者です。以下の作業報告書の内容をもとに、管理会社への送付メール本文を作成してください。
-
-【宛先】${first.recipientName||'ご担当者様'}
-【差出人会社】${first.companyName||''}
-【報告者】${first.reporter}
-【トーン】${first.tone||'丁寧・フォーマル'}
-【報告内容】
-${summaries}
-
-【出力ルール】
-- 件名は出力しないでください。本文のみ出力してください。
-- 冒頭の挨拶（宛先名を使う）
-- 各作業の概要を簡潔にまとめる
-- 「別添の報告書をご確認ください」旨を含める
-- 特記事項・次回予定があれば触れる
-- 結びの挨拶と署名（会社名・報告者名を使用）
-- 改行を適切に使い読みやすく整えてください`;
-
-  let bodyText = '';
-  try{
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1200, messages:[{role:'user',content:prompt}]})
-    });
-    const data = await res.json();
-    bodyText = data.error ? 'エラー: '+data.error.message : data.content.map(c=>c.text||'').join('');
-  }catch(e){bodyText='エラーが発生しました。APIキーとネットワーク接続をご確認ください。';}
-
-  document.getElementById('email-body-out').value = bodyText;
-  const resultCard = document.getElementById('mail-result-card');
-  resultCard.style.display = 'block';
-  resultCard.scrollIntoView({behavior:'smooth', block:'start'});
-  btn.disabled = false; btn.innerHTML = '✉️ 選択したレポートのメール文を生成';
-}
-
-function copyEmailBody(){
-  const text = document.getElementById('email-body-out').value;
-  navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '✅ コピーしました！';
-    setTimeout(()=>btn.innerHTML='📋 メール文章をコピー', 2000);
-  });
-}
-function downloadSelectedPDFs(){
-  const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
-  const reports = getReports().filter(r=>selected.includes(r.id));
-  if(!reports.length){alert('レポートを選択してください');return;}
-  reports.forEach((r,i)=>setTimeout(()=>openPrintWindow(r), i*800));
-}
 
 // --- PDF Generation ---
 function safeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
