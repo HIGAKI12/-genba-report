@@ -81,6 +81,9 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .desc-textarea{width:100%;font-family:'Noto Sans JP',sans-serif;font-size:12px;border:1.5px solid #E2E8F0;border-radius:8px;padding:8px 10px;color:var(--dark);background:#fff;outline:none;margin-top:8px;resize:vertical;min-height:60px;line-height:1.5;}
 .desc-textarea:focus{border-color:var(--blue);}
 .add-area-btn{width:100%;padding:11px;border:1.5px dashed var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;}
+.ai-desc-btn{width:100%;padding:10px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,#7C3AED,#1B4FD8);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s;}
+.ai-desc-btn:hover{opacity:.85;}
+.ai-desc-btn:disabled{opacity:.5;cursor:not-allowed;background:#B0BAC9;}
 
 .gen-btn{width:100%;padding:16px;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;transition:all .2s;}
 .gen-btn:hover{background:#1640B8;}
@@ -309,7 +312,7 @@ function showPage(p){
 // --- Areas ---
 function addArea(){
   const id = areaCounter++;
-  areas.push({id, name:'', beforeImg:null, beforeDesc:'', afterImg:null, afterDesc:''});
+  areas.push({id, name:'', beforeImg:null, beforeDesc:'', afterImg:null, afterDesc:'', isGenerating:false});
   renderAreas();
 }
 function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -339,6 +342,10 @@ function renderAreas(){
           <textarea class="desc-textarea" placeholder="施工後の状況を入力..." oninput="updateAreaField(${a.id},'afterDesc',this.value)">${escHtml(a.afterDesc)}</textarea>
         </div>
       </div>
+      ${a.isGenerating
+        ? `<button class="ai-desc-btn" disabled>⏳ AIが写真を分析中...</button>`
+        : `<button class="ai-desc-btn" onclick="generateAreaDescription(${a.id})" ${(!a.beforeImg && !a.afterImg) ? 'disabled' : ''}>✨ 写真からAIで説明文を自動生成</button>`
+      }
     </div>`).join('');
 }
 function removeArea(id){areas = areas.filter(a=>a.id!==id); renderAreas();}
@@ -353,6 +360,55 @@ function handleImg(e, id, type){
   reader.readAsDataURL(file);
 }
 function clearImg(id, type){const a=areas.find(a=>a.id===id); if(a){a[type+'Img']=null; renderAreas();}}
+
+// --- AI 説明文生成 ---
+async function generateAreaDescription(id){
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  if(!apiKey){resetKey();return;}
+  const a = areas.find(a=>a.id===id);
+  if(!a) return;
+  if(!a.beforeImg && !a.afterImg){alert('写真を1枚以上追加してから押してください');return;}
+
+  a.isGenerating = true;
+  renderAreas();
+
+  const content = [];
+  if(a.beforeImg) content.push({type:'image', source:{type:'base64', media_type:a.beforeImg.mtype||'image/jpeg', data:a.beforeImg.base64}});
+  if(a.afterImg)  content.push({type:'image', source:{type:'base64', media_type:a.afterImg.mtype||'image/jpeg',  data:a.afterImg.base64}});
+
+  let promptText = '';
+  if(a.beforeImg && a.afterImg){
+    promptText = `清掃作業の施工前（1枚目）と施工後（2枚目）の写真です。写真を詳しく観察して、報告書用の丁寧な文体で説明してください。必ず以下のJSON形式のみで返してください（他の文章は不要）:\n{"before":"施工前の状況の説明（2〜3文）","after":"施工後にどのように改善されたかの説明（2〜3文）"}`;
+  } else if(a.beforeImg){
+    promptText = `清掃作業前の写真です。写真を見て施工前の状況を報告書用の丁寧な文体で2〜3文で説明してください。必ず以下のJSON形式のみで返してください:\n{"before":"施工前の状況の説明","after":""}`;
+  } else {
+    promptText = `清掃作業後の写真です。写真を見て施工後の改善内容を報告書用の丁寧な文体で2〜3文で説明してください。必ず以下のJSON形式のみで返してください:\n{"before":"","after":"施工後の改善内容の説明"}`;
+  }
+  content.push({type:'text', text:promptText});
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:600, messages:[{role:'user',content}]})
+    });
+    const data = await res.json();
+    const text = data.content ? data.content.map(c=>c.text||'').join('') : '';
+    const match = text.match(/\{[\s\S]*\}/);
+    if(match){
+      const parsed = JSON.parse(match[0]);
+      if(parsed.before) a.beforeDesc = parsed.before;
+      if(parsed.after)  a.afterDesc  = parsed.after;
+    } else {
+      alert('説明文の生成に失敗しました。もう一度お試しください。');
+    }
+  }catch(e){
+    alert('エラーが発生しました。APIキーとネットワーク接続をご確認ください。');
+  }
+
+  a.isGenerating = false;
+  renderAreas();
+}
 
 // --- Save & PDF ---
 function savePDF(){
@@ -539,19 +595,21 @@ function safeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function buildReportHTML(r){
   const areasHTML = r.areas.map((a,idx)=>`
     <div class="pdf-area">
-      <div class="pdf-area-title">【${safeHtml(a.name)||`箇所${idx+1}`}】</div>
-      <div class="pdf-ba-grid">
-        <div class="pdf-ba-slot">
-          <div class="pdf-ba-badge before">BEFORE　施工前</div>
-          ${a.beforeImg ? `<img class="pdf-ba-img" src="${a.beforeImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
-          ${a.beforeDesc ? `<div class="pdf-desc">${safeHtml(a.beforeDesc)}</div>` : ''}
-        </div>
-        <div class="pdf-ba-slot">
-          <div class="pdf-ba-badge after">AFTER　施工後</div>
-          ${a.afterImg ? `<img class="pdf-ba-img" src="${a.afterImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
-          ${a.afterDesc ? `<div class="pdf-desc">${safeHtml(a.afterDesc)}</div>` : ''}
-        </div>
-      </div>
+      <div class="pdf-area-title">▶ ${safeHtml(a.name)||`箇所${idx+1}`}</div>
+      <table class="pdf-photo-table">
+        <tr>
+          <td class="pdf-photo-cell">
+            <div class="pdf-ba-badge before">BEFORE　施工前</div>
+            ${a.beforeImg ? `<img class="pdf-ba-img" src="${a.beforeImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
+            ${a.beforeDesc ? `<div class="pdf-photo-desc"><span class="pdf-desc-label">【施工前の状況】</span><br>${safeHtml(a.beforeDesc)}</div>` : ''}
+          </td>
+          <td class="pdf-photo-cell">
+            <div class="pdf-ba-badge after">AFTER　施工後</div>
+            ${a.afterImg ? `<img class="pdf-ba-img" src="${a.afterImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
+            ${a.afterDesc ? `<div class="pdf-photo-desc pdf-photo-desc-after"><span class="pdf-desc-label after">【施工後の結果】</span><br>${safeHtml(a.afterDesc)}</div>` : ''}
+          </td>
+        </tr>
+      </table>
     </div>`).join('');
 
   const infoRows = [
@@ -619,19 +677,23 @@ function openPrintWindow(r){
     .pdf-info-table td{padding:8px 12px;border:1px solid #E2E8F0;color:#0F1923;}
 
     /* Sections */
-    .pdf-section{margin-bottom:20px;}
-    .pdf-section-title{font-size:13px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:14px;}
-    .pdf-area{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #E2E8F0;}
+    .pdf-section{margin-bottom:22px;}
+    .pdf-section-title{font-size:13px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:16px;}
+    .pdf-area{margin-bottom:22px;padding-bottom:20px;border-bottom:1.5px solid #E2E8F0;}
     .pdf-area:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-    .pdf-area-title{font-size:12px;font-weight:700;color:#3A4A5C;margin-bottom:10px;padding:4px 10px;background:#F5F7FA;border-radius:4px;}
-    .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .pdf-ba-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
+    .pdf-area-title{font-size:13px;font-weight:700;color:#1B4FD8;margin-bottom:12px;padding:6px 12px;background:#EEF3FF;border-radius:4px;border-left:3px solid #1B4FD8;}
+    .pdf-photo-table{width:100%;border-collapse:separate;border-spacing:12px 0;}
+    .pdf-photo-cell{width:50%;vertical-align:top;padding:0;}
+    .pdf-ba-badge{font-size:10px;font-weight:800;padding:4px 12px;border-radius:50px;display:inline-block;margin-bottom:8px;}
     .pdf-ba-badge.before{background:#FEE2E2;color:#DC2626;}
     .pdf-ba-badge.after{background:#DCFCE7;color:#16A34A;}
-    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;border:1px solid #E2E8F0;}
-    .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F5F5F5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;margin-bottom:6px;}
-    .pdf-desc{font-size:11px;color:#3A4A5C;line-height:1.7;background:#F8FAFC;border-radius:4px;padding:6px 8px;}
-    .pdf-notes{font-size:12px;color:#3A4A5C;line-height:1.8;padding:10px 12px;background:#F8FAFC;border-radius:6px;}
+    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:0;border:1px solid #E2E8F0;}
+    .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F5F5F5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;}
+    .pdf-photo-desc{font-size:11.5px;color:#3A4A5C;line-height:1.75;background:#FFF8F8;border:1px solid #FEE2E2;border-radius:0 0 6px 6px;padding:8px 10px;border-top:none;}
+    .pdf-photo-desc-after{background:#F0FFF4;border-color:#DCFCE7;}
+    .pdf-desc-label{font-size:10px;font-weight:800;color:#DC2626;}
+    .pdf-desc-label.after{color:#16A34A;}
+    .pdf-notes{font-size:12px;color:#3A4A5C;line-height:1.85;padding:12px 14px;background:#F8FAFC;border-radius:6px;border:1px solid #E2E8F0;}
 
     /* Footer */
     .pdf-footer-block{display:flex;justify-content:space-between;align-items:flex-end;border-top:2px solid #E2E8F0;padding-top:14px;margin-top:20px;}
