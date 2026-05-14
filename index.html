@@ -32,18 +32,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 
 #main-app{display:none;}
 .nav{background:var(--blue);position:sticky;top:0;z-index:100;}
-.nav-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;padding:0 16px;}
+.nav-inner{max-width:700px;margin:0 auto;display:flex;align-items:center;padding:0 16px;}
 .nav-logo{font-size:16px;font-weight:900;color:#fff;padding:14px 0;flex:1;}
 .nav-tabs{display:flex;}
 .nav-tab{padding:14px 12px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,0.65);border:none;background:transparent;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
 .nav-tab.active{color:#fff;border-bottom-color:#fff;}
 .nav-key{font-size:11px;color:rgba(255,255,255,0.6);cursor:pointer;padding:14px 0 14px 10px;text-decoration:underline;}
 
-.page{display:none;max-width:680px;margin:0 auto;padding:20px 16px 60px;}
+.page{display:none;max-width:700px;margin:0 auto;padding:20px 16px 60px;}
 .page.visible{display:block;}
 
 .card{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:20px;margin-bottom:16px;}
 .card-title{font-size:13px;font-weight:700;color:var(--mid);letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+
+/* Company Settings Card */
+.company-card{border-color:var(--blue3);background:var(--blue2);}
+.company-saved{font-size:10px;font-weight:700;color:var(--green);margin-left:auto;}
 
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 @media(max-width:480px){.form-row{grid-template-columns:1fr;}}
@@ -84,25 +88,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 
 .history-empty{text-align:center;padding:48px 20px;color:var(--sub);font-size:14px;}
 .history-empty-icon{font-size:40px;margin-bottom:12px;}
-
 .select-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-radius:var(--radius-sm);border:1.5px solid #E2E8F0;margin-bottom:12px;}
 .select-bar-left{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--mid);cursor:pointer;}
 .select-count{font-size:11px;color:var(--sub);}
-
 .report-item{background:var(--card);border-radius:var(--radius);border:1.5px solid #E2E8F0;padding:16px 18px;margin-bottom:10px;transition:all .2s;}
 .report-item.selected{border-color:var(--blue);background:var(--blue2);}
 .report-item-row{display:flex;align-items:flex-start;gap:12px;}
 .report-checkbox{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;margin-top:3px;}
 .report-info{flex:1;}
 .report-title{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:3px;}
-.report-meta{font-size:11px;color:var(--sub);margin-bottom:5px;}
+.report-meta{font-size:11px;color:var(--sub);margin-bottom:4px;}
 .report-area-names{font-size:11px;color:var(--sub);}
 .report-actions{display:flex;gap:6px;margin-top:10px;}
 .small-btn{padding:5px 12px;border:1.5px solid #E2E8F0;border-radius:50px;background:#fff;font-family:'Noto Sans JP',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;}
 .small-btn:hover{background:var(--blue2);border-color:var(--blue3);}
 .small-btn.danger{color:var(--red);}
 .small-btn.danger:hover{background:var(--red2);border-color:var(--red);}
-
 .mail-card{display:none;}
 .email-body-area{width:100%;min-height:300px;font-family:'Noto Sans JP',sans-serif;font-size:13px;line-height:1.9;border:1.5px solid #E2E8F0;border-radius:8px;padding:12px;color:var(--dark);outline:none;resize:vertical;background:#fff;margin-bottom:12px;}
 .email-body-area:focus{border-color:var(--blue);}
@@ -111,7 +112,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .pdf-dl-btn{width:100%;padding:13px;border:1.5px solid var(--blue3);border-radius:var(--radius-sm);background:var(--blue2);color:var(--blue);font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
 .pdf-dl-btn:hover{background:#dce9ff;}
 .note-text{font-size:11px;color:var(--sub);margin-top:8px;text-align:center;line-height:1.6;}
-
 .loading-dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin:0 3px;animation:ld .9s infinite;}
 .loading-dots span:nth-child(2){animation-delay:.2s;}
 .loading-dots span:nth-child(3){animation-delay:.4s;}
@@ -151,36 +151,70 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
   <div class="page visible" id="page-create">
     <div style="height:16px;"></div>
 
-    <div class="card">
-      <div class="card-title">📋 基本情報</div>
+    <!-- 会社設定 -->
+    <div class="card company-card">
+      <div class="card-title">
+        🏢 会社設定
+        <span class="company-saved" id="company-saved-badge"></span>
+      </div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">現場名・工事名</div><input class="form-input" id="site-name" placeholder="例：トレ・パーチェ一宮 4月定期清掃" type="text"></div>
+        <div class="form-group"><div class="form-label">自社名</div><input class="form-input" id="company-name" placeholder="例：○○清掃サービス株式会社" type="text" oninput="autoSaveCompany()"></div>
+        <div class="form-group"><div class="form-label">電話番号（任意・PDF記載用）</div><input class="form-input" id="company-phone" placeholder="例：0586-00-0000" type="tel" oninput="autoSaveCompany()"></div>
+      </div>
+    </div>
+
+    <!-- 物件・作業情報 -->
+    <div class="card">
+      <div class="card-title">🏠 物件・作業情報</div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">物件名</div><input class="form-input" id="site-name" placeholder="例：トレ・パーチェ一宮" type="text"></div>
         <div class="form-group"><div class="form-label">作業日</div><input class="form-input" id="report-date" type="date"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><div class="form-label">報告者名</div><input class="form-input" id="reporter" placeholder="例：檜垣" type="text"></div>
+        <div class="form-group full"><div class="form-label">所在地（任意）</div><input class="form-input" id="site-address" placeholder="例：愛知県一宮市○○町1-2-3" type="text"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">作業種別</div>
+          <select class="form-select" id="work-type">
+            <option>定期清掃</option>
+            <option>特別清掃</option>
+            <option>緊急対応</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div class="form-group"><div class="form-label">次回清掃予定（任意）</div><input class="form-input" id="next-date" placeholder="例：2026年7月" type="text"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full"><div class="form-label">担当者名</div><input class="form-input" id="reporter" placeholder="例：檜垣" type="text"></div>
+      </div>
+    </div>
+
+    <!-- 取引先情報（メール用） -->
+    <div class="card">
+      <div class="card-title">✉️ 取引先情報（メール送信用）</div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">管理会社名・宛先名</div><input class="form-input" id="recipient-name" placeholder="例：三和住宅株式会社 御中" type="text"></div>
+        <div class="form-group"><div class="form-label">取引先メールアドレス</div><input class="form-input" id="recipient-email" placeholder="例：tanaka@example.com" type="email"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
         <div class="form-group"><div class="form-label">メールのトーン</div>
           <select class="form-select" id="tone"><option>丁寧・フォーマル</option><option>簡潔・ビジネス</option></select>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><div class="form-label">取引先メールアドレス</div><input class="form-input" id="recipient-email" placeholder="例：tanaka@example.com" type="email"></div>
-        <div class="form-group"><div class="form-label">宛先名（会社名・担当者名）</div><input class="form-input" id="recipient-name" placeholder="例：三和住宅株式会社 御中" type="text"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full"><div class="form-label">CCアドレス（任意）</div><input class="form-input" id="cc-email" placeholder="例：boss@example.com" type="email"></div>
-      </div>
     </div>
 
+    <!-- 施工箇所 -->
     <div class="card">
       <div class="card-title">🔨 施工前後の変化</div>
       <div id="areas-container"></div>
       <button class="add-area-btn" onclick="addArea()">＋ 箇所を追加</button>
     </div>
 
+    <!-- 特記事項 -->
     <div class="card">
       <div class="card-title">📝 特記事項（任意）</div>
-      <textarea class="form-textarea" id="notes" placeholder="例：各箇所とも大きな損傷等は確認されませんでした。次回定期清掃は7月を予定。"></textarea>
+      <textarea class="form-textarea" id="notes" placeholder="例：各箇所とも大きな損傷等は確認されませんでした。"></textarea>
     </div>
 
     <button class="gen-btn" onclick="savePDF()">📄 PDF報告書を出力・保存</button>
@@ -189,7 +223,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
   <!-- 履歴・メールページ -->
   <div class="page" id="page-history">
     <div style="height:16px;"></div>
-
     <div id="select-bar" class="select-bar" style="display:none;">
       <label class="select-bar-left">
         <input type="checkbox" id="select-all-cb" onchange="toggleSelectAll(this.checked)" style="width:16px;height:16px;accent-color:var(--blue);">
@@ -197,9 +230,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
       </label>
       <span class="select-count" id="select-count"></span>
     </div>
-
     <div id="reports-list"></div>
-
     <div id="mail-section" style="display:none;">
       <div class="card">
         <div class="card-title">✉️ メール文章を生成</div>
@@ -219,6 +250,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 <script>
 let areas = [];
 let areaCounter = 0;
+let saveTimer;
 
 // --- API Key ---
 function saveApiKey(){
@@ -235,9 +267,9 @@ document.getElementById('api-key-input').addEventListener('keydown', e=>{if(e.ke
 
 function initApp(){
   document.getElementById('report-date').value = new Date().toISOString().split('T')[0];
+  loadCompanySettings();
   if(!areas.length) addArea();
 }
-
 window.onload = ()=>{
   if(localStorage.getItem('anthropic_api_key')){
     document.getElementById('api-screen').style.display = 'none';
@@ -245,6 +277,25 @@ window.onload = ()=>{
     initApp();
   }
 };
+
+// --- Company Settings ---
+function getCompanySettings(){return JSON.parse(localStorage.getItem('company_settings') || '{}');}
+function loadCompanySettings(){
+  const s = getCompanySettings();
+  if(s.name) document.getElementById('company-name').value = s.name;
+  if(s.phone) document.getElementById('company-phone').value = s.phone;
+  if(s.name || s.phone) document.getElementById('company-saved-badge').textContent = '✅ 保存済み';
+}
+function autoSaveCompany(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    const name = document.getElementById('company-name').value.trim();
+    const phone = document.getElementById('company-phone').value.trim();
+    localStorage.setItem('company_settings', JSON.stringify({name, phone}));
+    const badge = document.getElementById('company-saved-badge');
+    badge.textContent = '✅ 保存済み';
+  }, 600);
+}
 
 // --- Nav ---
 function showPage(p){
@@ -261,11 +312,7 @@ function addArea(){
   areas.push({id, name:'', beforeImg:null, beforeDesc:'', afterImg:null, afterDesc:''});
   renderAreas();
 }
-
-function escHtml(s){
-  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function renderAreas(){
   const c = document.getElementById('areas-container');
   if(!areas.length){c.innerHTML='';return;}
@@ -281,25 +328,21 @@ function renderAreas(){
           <span class="ba-badge before">BEFORE</span>
           ${a.beforeImg
             ? `<div class="ba-preview"><img src="${a.beforeImg.dataUrl}"><button class="ba-preview-remove" onclick="clearImg(${a.id},'before')">✕</button><div class="ba-preview-label before">施工前</div></div>`
-            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'before')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工前写真</div></div>`
-          }
+            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'before')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工前写真</div></div>`}
           <textarea class="desc-textarea" placeholder="施工前の状況を入力..." oninput="updateAreaField(${a.id},'beforeDesc',this.value)">${escHtml(a.beforeDesc)}</textarea>
         </div>
         <div>
           <span class="ba-badge after">AFTER</span>
           ${a.afterImg
             ? `<div class="ba-preview"><img src="${a.afterImg.dataUrl}"><button class="ba-preview-remove" onclick="clearImg(${a.id},'after')">✕</button><div class="ba-preview-label after">施工後</div></div>`
-            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'after')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工後写真</div></div>`
-          }
+            : `<div class="ba-upload"><input type="file" accept="image/*" onchange="handleImg(event,${a.id},'after')"><div style="font-size:22px;margin-bottom:4px;">📷</div><div style="font-size:11px;font-weight:700;color:var(--sub);">施工後写真</div></div>`}
           <textarea class="desc-textarea" placeholder="施工後の状況を入力..." oninput="updateAreaField(${a.id},'afterDesc',this.value)">${escHtml(a.afterDesc)}</textarea>
         </div>
       </div>
     </div>`).join('');
 }
-
 function removeArea(id){areas = areas.filter(a=>a.id!==id); renderAreas();}
 function updateAreaField(id, field, val){const a=areas.find(a=>a.id===id); if(a) a[field]=val;}
-
 function handleImg(e, id, type){
   const file = e.target.files[0]; if(!file) return;
   const reader = new FileReader();
@@ -313,8 +356,14 @@ function clearImg(id, type){const a=areas.find(a=>a.id===id); if(a){a[type+'Img'
 
 // --- Save & PDF ---
 function savePDF(){
-  const siteName = document.getElementById('site-name').value.trim() || '現場';
+  const cs = getCompanySettings();
+  const companyName = cs.name || '';
+  const companyPhone = cs.phone || '';
+  const siteName = document.getElementById('site-name').value.trim() || '物件名未入力';
+  const siteAddress = document.getElementById('site-address').value.trim();
   const date = document.getElementById('report-date').value;
+  const workType = document.getElementById('work-type').value;
+  const nextDate = document.getElementById('next-date').value.trim();
   const reporter = document.getElementById('reporter').value.trim() || '担当者';
   const recipientEmail = document.getElementById('recipient-email').value.trim();
   const recipientName = document.getElementById('recipient-name').value.trim();
@@ -324,15 +373,15 @@ function savePDF(){
   const dateStr = date ? new Date(date).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'}) : '';
 
   const report = {
-    id: Date.now(),
-    siteName, date, dateStr, reporter, recipientEmail, recipientName, ccEmail, tone, notes,
+    id: Date.now(), siteName, siteAddress, date, dateStr, workType, nextDate,
+    reporter, companyName, companyPhone,
+    recipientEmail, recipientName, ccEmail, tone, notes,
     savedAt: new Date().toISOString(),
     areas: areas.map(a=>({
       name: a.name,
       beforeImg: a.beforeImg ? {dataUrl: a.beforeImg.dataUrl} : null,
       afterImg: a.afterImg ? {dataUrl: a.afterImg.dataUrl} : null,
-      beforeDesc: a.beforeDesc,
-      afterDesc: a.afterDesc
+      beforeDesc: a.beforeDesc, afterDesc: a.afterDesc
     }))
   };
 
@@ -347,15 +396,14 @@ function savePDF(){
   }
 
   openPrintWindow(report);
-
-  if(confirm('報告書を保存しました！フォームをリセットしますか？')){
-    resetForm();
-  }
+  if(confirm('報告書を保存しました！フォームをリセットしますか？')) resetForm();
 }
 
 function resetForm(){
   document.getElementById('site-name').value = '';
+  document.getElementById('site-address').value = '';
   document.getElementById('report-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('next-date').value = '';
   document.getElementById('reporter').value = '';
   document.getElementById('recipient-email').value = '';
   document.getElementById('recipient-name').value = '';
@@ -367,23 +415,16 @@ function resetForm(){
 // --- Reports Storage ---
 function getReports(){return JSON.parse(localStorage.getItem('reports') || '[]');}
 
-// --- Reports Render ---
 function renderReports(){
   const reports = getReports();
   const list = document.getElementById('reports-list');
   const selectBar = document.getElementById('select-bar');
   const mailSection = document.getElementById('mail-section');
-
   if(!reports.length){
     list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div>まだ報告書がありません。<br>「作成」タブから報告書を作成してください。</div>`;
-    selectBar.style.display = 'none';
-    mailSection.style.display = 'none';
-    return;
+    selectBar.style.display = 'none'; mailSection.style.display = 'none'; return;
   }
-
-  selectBar.style.display = 'flex';
-  mailSection.style.display = 'block';
-
+  selectBar.style.display = 'flex'; mailSection.style.display = 'block';
   list.innerHTML = reports.map(r=>{
     const d = new Date(r.savedAt);
     const ds = d.toLocaleDateString('ja-JP',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
@@ -392,7 +433,7 @@ function renderReports(){
       <div class="report-item-row">
         <input type="checkbox" class="report-checkbox" onchange="updateSelection()" data-id="${r.id}">
         <div class="report-info">
-          <div class="report-title">🏗️ ${r.siteName}</div>
+          <div class="report-title">🏠 ${r.siteName}　<span style="font-size:11px;font-weight:600;color:var(--blue);">${r.workType||''}</span></div>
           <div class="report-meta">📅 ${r.dateStr||r.date} ｜ 👤 ${r.reporter} ｜ 📍 ${r.areas.length}箇所</div>
           <div class="report-area-names">${areaNames}</div>
           <div class="report-actions">
@@ -403,43 +444,29 @@ function renderReports(){
       </div>
     </div>`;
   }).join('');
-
   updateSelection();
 }
 
 function updateSelection(){
   const allCbs = document.querySelectorAll('.report-checkbox');
   const checked = document.querySelectorAll('.report-checkbox:checked');
-  const count = checked.length;
-  const total = allCbs.length;
+  const count = checked.length; const total = allCbs.length;
   document.getElementById('select-count').textContent = `${count}/${total} 件選択中`;
   const allCb = document.getElementById('select-all-cb');
-  allCb.checked = count === total && total > 0;
-  allCb.indeterminate = count > 0 && count < total;
-  allCbs.forEach(cb=>{
-    const item = cb.closest('.report-item');
-    if(item) item.classList.toggle('selected', cb.checked);
-  });
-  const mailGenBtn = document.getElementById('mail-gen-btn');
-  if(mailGenBtn) mailGenBtn.disabled = count === 0;
+  allCb.checked = count===total && total>0;
+  allCb.indeterminate = count>0 && count<total;
+  allCbs.forEach(cb=>{ const item=cb.closest('.report-item'); if(item) item.classList.toggle('selected',cb.checked); });
+  const btn = document.getElementById('mail-gen-btn');
+  if(btn) btn.disabled = count===0;
 }
-
-function toggleSelectAll(checked){
-  document.querySelectorAll('.report-checkbox').forEach(cb=>cb.checked=checked);
-  updateSelection();
-}
-
+function toggleSelectAll(checked){ document.querySelectorAll('.report-checkbox').forEach(cb=>cb.checked=checked); updateSelection(); }
 function deleteReport(id){
   if(!confirm('この報告書を削除しますか？')) return;
   localStorage.setItem('reports', JSON.stringify(getReports().filter(r=>r.id!==id)));
   document.getElementById('mail-result-card').style.display = 'none';
   renderReports();
 }
-
-function rePDF(id){
-  const r = getReports().find(r=>r.id===id);
-  if(r) openPrintWindow(r);
-}
+function rePDF(id){ const r=getReports().find(r=>r.id===id); if(r) openPrintWindow(r); }
 
 // --- Email Generation ---
 async function generateEmail(){
@@ -448,39 +475,36 @@ async function generateEmail(){
   const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
   if(!selected.length){alert('レポートを1件以上選択してください');return;}
   const reports = getReports().filter(r=>selected.includes(r.id));
-
   const btn = document.getElementById('mail-gen-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-
+  btn.disabled = true; btn.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
   const first = reports[0];
-  const reportSummaries = reports.map((r, i)=>{
-    const areaSummary = r.areas.map(a=>`  【${a.name||'箇所'}】\n  施工前：${a.beforeDesc||'（記載なし）'}\n  施工後：${a.afterDesc||'（記載なし）'}`).join('\n');
-    return `■ 報告書${i+1}：${r.siteName}（${r.dateStr||r.date}）\n${areaSummary}${r.notes?'\n  特記事項：'+r.notes:''}`;
+  const summaries = reports.map((r,i)=>{
+    const areas = r.areas.map(a=>`  【${a.name||'箇所'}】\n  施工前：${a.beforeDesc||'（記載なし）'}\n  施工後：${a.afterDesc||'（記載なし）'}`).join('\n');
+    return `■ ${r.siteName}（${r.dateStr||r.date}・${r.workType||''}）\n${areas}${r.notes?'\n  特記事項：'+r.notes:''}${r.nextDate?'\n  次回予定：'+r.nextDate:''}`;
   }).join('\n\n');
-
-  const prompt = `あなたは建設・管理会社の現場担当者です。以下の現場報告書の内容をもとに、取引先への送付メールの本文を作成してください。
+  const prompt = `あなたは清掃・管理会社の担当者です。以下の作業報告書の内容をもとに、管理会社への送付メール本文を作成してください。
 
 【宛先】${first.recipientName||'ご担当者様'}
+【差出人会社】${first.companyName||''}
 【報告者】${first.reporter}
 【トーン】${first.tone||'丁寧・フォーマル'}
 【報告内容】
-${reportSummaries}
+${summaries}
 
 【出力ルール】
 - 件名は出力しないでください。本文のみ出力してください。
 - 冒頭の挨拶（宛先名を使う）
-- 各報告書の概要を簡潔にまとめる
+- 各作業の概要を簡潔にまとめる
 - 「別添の報告書をご確認ください」旨を含める
-- 特記事項があれば触れる
-- 結びの挨拶と署名（報告者名を使用）
+- 特記事項・次回予定があれば触れる
+- 結びの挨拶と署名（会社名・報告者名を使用）
 - 改行を適切に使い読みやすく整えてください`;
 
   let bodyText = '';
   try{
     const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method: 'POST',
-      headers: {'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1200, messages:[{role:'user',content:prompt}]})
     });
     const data = await res.json();
@@ -491,8 +515,7 @@ ${reportSummaries}
   const resultCard = document.getElementById('mail-result-card');
   resultCard.style.display = 'block';
   resultCard.scrollIntoView({behavior:'smooth', block:'start'});
-  btn.disabled = false;
-  btn.innerHTML = '✉️ 選択したレポートのメール文を生成';
+  btn.disabled = false; btn.innerHTML = '✉️ 選択したレポートのメール文を生成';
 }
 
 function copyEmailBody(){
@@ -503,52 +526,74 @@ function copyEmailBody(){
     setTimeout(()=>btn.innerHTML='📋 メール文章をコピー', 2000);
   });
 }
-
 function downloadSelectedPDFs(){
   const selected = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb=>Number(cb.dataset.id));
   const reports = getReports().filter(r=>selected.includes(r.id));
   if(!reports.length){alert('レポートを選択してください');return;}
-  reports.forEach((r, i)=>setTimeout(()=>openPrintWindow(r), i*800));
+  reports.forEach((r,i)=>setTimeout(()=>openPrintWindow(r), i*800));
 }
 
 // --- PDF Generation ---
+function safeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
+
 function buildReportHTML(r){
-  const areasHTML = r.areas.map((a, idx)=>`
+  const areasHTML = r.areas.map((a,idx)=>`
     <div class="pdf-area">
-      <div class="pdf-area-title">【${a.name||`箇所${idx+1}`}】</div>
+      <div class="pdf-area-title">【${safeHtml(a.name)||`箇所${idx+1}`}】</div>
       <div class="pdf-ba-grid">
         <div class="pdf-ba-slot">
-          <div class="pdf-ba-label before">BEFORE　施工前</div>
+          <div class="pdf-ba-badge before">BEFORE　施工前</div>
           ${a.beforeImg ? `<img class="pdf-ba-img" src="${a.beforeImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
-          ${a.beforeDesc ? `<div class="pdf-desc">${a.beforeDesc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
+          ${a.beforeDesc ? `<div class="pdf-desc">${safeHtml(a.beforeDesc)}</div>` : ''}
         </div>
         <div class="pdf-ba-slot">
-          <div class="pdf-ba-label after">AFTER　施工後</div>
+          <div class="pdf-ba-badge after">AFTER　施工後</div>
           ${a.afterImg ? `<img class="pdf-ba-img" src="${a.afterImg.dataUrl}">` : '<div class="pdf-ba-no-img">写真なし</div>'}
-          ${a.afterDesc ? `<div class="pdf-desc">${a.afterDesc.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>` : ''}
+          ${a.afterDesc ? `<div class="pdf-desc">${safeHtml(a.afterDesc)}</div>` : ''}
         </div>
       </div>
     </div>`).join('');
 
+  const infoRows = [
+    ['物件名', safeHtml(r.siteName), '作業日', safeHtml(r.dateStr||r.date)],
+    r.siteAddress ? ['所在地', `<td colspan="3" style="font-size:12px;">${safeHtml(r.siteAddress)}</td>`, null, null] : null,
+    ['作業種別', safeHtml(r.workType||''), '次回予定', safeHtml(r.nextDate||'—')],
+    ['担当業者', safeHtml(r.companyName||'—'), '担当者', safeHtml(r.reporter)],
+  ].filter(Boolean);
+
+  const infoTableRows = infoRows.map(row=>{
+    if(row[2]===null) return `<tr><th>${row[0]}</th>${row[1]}</tr>`;
+    return `<tr><th>${row[0]}</th><td>${row[1]}</td><th>${row[2]}</th><td>${row[3]}</td></tr>`;
+  }).join('');
+
   return `<div class="pdf-page">
-    <div class="pdf-header">
-      <div class="pdf-header-title">現場作業報告書</div>
-      <div class="pdf-header-meta">
-        <span>現場名：${r.siteName}</span>
-        <span>作業日：${r.dateStr||r.date}</span>
-        <span>報告者：${r.reporter}</span>
+    <div class="pdf-top">
+      <div class="pdf-title-area">
+        <div class="pdf-main-title">${safeHtml(r.workType||'定期清掃')}作業報告書</div>
+        <div class="pdf-report-date">報告日：${safeHtml(r.dateStr||r.date)}</div>
+      </div>
+      <div class="pdf-company-area">
+        ${r.companyName ? `<div class="pdf-company-name">${safeHtml(r.companyName)}</div>` : ''}
+        ${r.companyPhone ? `<div class="pdf-company-phone">TEL：${safeHtml(r.companyPhone)}</div>` : ''}
       </div>
     </div>
-    ${r.recipientName ? `<div class="pdf-to">提出先：${r.recipientName}</div>` : ''}
+
+    <table class="pdf-info-table">${infoTableRows}</table>
+
     <div class="pdf-section">
       <div class="pdf-section-title">■ 施工前後の変化</div>
       ${areasHTML}
     </div>
-    ${r.notes ? `<div class="pdf-section"><div class="pdf-section-title">■ 特記事項</div><div class="pdf-notes">${r.notes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div></div>` : ''}
-    <div class="pdf-footer">
-      <span>${r.siteName}</span>
-      <span>報告者：${r.reporter}</span>
-      <span>${r.dateStr||r.date}</span>
+
+    ${r.notes ? `<div class="pdf-section"><div class="pdf-section-title">■ 特記事項</div><div class="pdf-notes">${safeHtml(r.notes)}</div></div>` : ''}
+
+    <div class="pdf-footer-block">
+      <div class="pdf-footer-info">
+        ${r.companyName ? `<div>担当業者：${safeHtml(r.companyName)}</div>` : ''}
+        <div>担当者：${safeHtml(r.reporter)}</div>
+        <div>報告日：${safeHtml(r.dateStr||r.date)}</div>
+      </div>
+      <div class="pdf-stamp-box"><div class="pdf-stamp-label">会社印</div></div>
     </div>
   </div>`;
 }
@@ -557,31 +602,51 @@ function openPrintWindow(r){
   const css = `
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Noto Sans JP',sans-serif;color:#0F1923;}
-    .pdf-page{padding:28px 32px;}
-    .pdf-header{border-bottom:3px solid #1B4FD8;padding-bottom:14px;margin-bottom:20px;}
-    .pdf-header-title{font-size:20px;font-weight:900;color:#1B4FD8;margin-bottom:6px;}
-    .pdf-header-meta{font-size:12px;color:#6B7A8D;display:flex;gap:20px;flex-wrap:wrap;}
-    .pdf-to{font-size:13px;color:#0F1923;margin-bottom:16px;}
+    body{font-family:'Noto Sans JP',sans-serif;color:#0F1923;background:#fff;}
+    .pdf-page{padding:28px 32px;max-width:100%;}
+
+    /* Header */
+    .pdf-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;padding-bottom:14px;border-bottom:3px solid #1B4FD8;}
+    .pdf-main-title{font-size:22px;font-weight:900;color:#1B4FD8;margin-bottom:4px;}
+    .pdf-report-date{font-size:11px;color:#6B7A8D;}
+    .pdf-company-area{text-align:right;}
+    .pdf-company-name{font-size:14px;font-weight:700;color:#0F1923;}
+    .pdf-company-phone{font-size:11px;color:#6B7A8D;margin-top:2px;}
+
+    /* Info Table */
+    .pdf-info-table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12px;}
+    .pdf-info-table th{background:#EEF3FF;color:#1B4FD8;font-weight:700;padding:8px 12px;border:1px solid #C7D7FA;width:90px;white-space:nowrap;}
+    .pdf-info-table td{padding:8px 12px;border:1px solid #E2E8F0;color:#0F1923;}
+
+    /* Sections */
     .pdf-section{margin-bottom:20px;}
-    .pdf-section-title{font-size:14px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:14px;}
-    .pdf-area{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #E2E8F0;}
-    .pdf-area:last-child{border-bottom:none;}
-    .pdf-area-title{font-size:13px;font-weight:700;color:#3A4A5C;margin-bottom:10px;}
+    .pdf-section-title{font-size:13px;font-weight:700;color:#1B4FD8;border-left:4px solid #1B4FD8;padding-left:10px;margin-bottom:14px;}
+    .pdf-area{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #E2E8F0;}
+    .pdf-area:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+    .pdf-area-title{font-size:12px;font-weight:700;color:#3A4A5C;margin-bottom:10px;padding:4px 10px;background:#F5F7FA;border-radius:4px;}
     .pdf-ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .pdf-ba-label{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
-    .pdf-ba-label.before{background:#FEE2E2;color:#DC2626;}
-    .pdf-ba-label.after{background:#DCFCE7;color:#16A34A;}
-    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;}
+    .pdf-ba-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;}
+    .pdf-ba-badge.before{background:#FEE2E2;color:#DC2626;}
+    .pdf-ba-badge.after{background:#DCFCE7;color:#16A34A;}
+    .pdf-ba-img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;border:1px solid #E2E8F0;}
     .pdf-ba-no-img{width:100%;aspect-ratio:4/3;background:#F5F5F5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#B0BAC9;margin-bottom:6px;}
-    .pdf-desc{font-size:12px;color:#3A4A5C;line-height:1.7;}
-    .pdf-notes{font-size:12px;color:#3A4A5C;line-height:1.8;}
-    .pdf-footer{border-top:1px solid #E2E8F0;padding-top:10px;margin-top:20px;font-size:11px;color:#6B7A8D;display:flex;justify-content:space-between;}
+    .pdf-desc{font-size:11px;color:#3A4A5C;line-height:1.7;background:#F8FAFC;border-radius:4px;padding:6px 8px;}
+    .pdf-notes{font-size:12px;color:#3A4A5C;line-height:1.8;padding:10px 12px;background:#F8FAFC;border-radius:6px;}
+
+    /* Footer */
+    .pdf-footer-block{display:flex;justify-content:space-between;align-items:flex-end;border-top:2px solid #E2E8F0;padding-top:14px;margin-top:20px;}
+    .pdf-footer-info{font-size:11px;color:#6B7A8D;line-height:1.9;}
+    .pdf-stamp-box{width:80px;height:80px;border:2px solid #B0BAC9;border-radius:4px;display:flex;align-items:center;justify-content:center;}
+    .pdf-stamp-label{font-size:10px;color:#B0BAC9;font-weight:700;letter-spacing:1px;}
+
+    @media print{
+      body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    }
   `;
   const html = `<!DOCTYPE html><html lang="ja"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>${r.siteName} 報告書</title>
+    <title>${r.siteName} ${r.workType||''}報告書</title>
     <style>${css}</style>
   </head><body>${buildReportHTML(r)}</body></html>`;
   const blob = new Blob([html], {type:'text/html;charset=utf-8'});
