@@ -427,7 +427,7 @@ async function generateAreaDescription(id){
     const res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:600, messages:[{role:'user',content}]})
+      body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:600, system:'あなたは日本語のみで回答する報告書作成アシスタントです。英語は絶対に使わないでください。', messages:[{role:'user',content}]})
     });
     const data = await res.json();
     const text = data.content ? data.content.map(c=>c.text||'').join('') : '';
@@ -609,7 +609,7 @@ function buildReportHTML(r){
     ['物件名', safeHtml(r.siteName), '作業日', safeHtml(r.dateStr||r.date)],
     r.siteAddress ? ['所在地', `<td colspan="3" style="font-size:12px;">${safeHtml(r.siteAddress)}</td>`, null, null] : null,
     ['作業種別', safeHtml(r.workType||''), '次回予定', safeHtml(r.nextDate||'—')],
-    ['担当業者', safeHtml(r.companyName||'—'), '担当者', safeHtml(r.reporter)],
+    ['担当者', safeHtml(r.reporter), '', ''],
   ].filter(Boolean);
 
   const infoTableRows = infoRows.map(row=>{
@@ -623,10 +623,7 @@ function buildReportHTML(r){
         <div class="pdf-main-title">${safeHtml(r.workType||'定期清掃')}作業報告書</div>
         <div class="pdf-report-date">報告日：${safeHtml(r.dateStr||r.date)}</div>
       </div>
-      <div class="pdf-company-area">
-        ${r.companyName ? `<div class="pdf-company-name">${safeHtml(r.companyName)}</div>` : ''}
-        ${r.companyPhone ? `<div class="pdf-company-phone">TEL：${safeHtml(r.companyPhone)}</div>` : ''}
-      </div>
+      <div></div>
     </div>
 
     <table class="pdf-info-table">${infoTableRows}</table>
@@ -640,11 +637,9 @@ function buildReportHTML(r){
 
     <div class="pdf-footer-block">
       <div class="pdf-footer-info">
-        ${r.companyName ? `<div>担当業者：${safeHtml(r.companyName)}</div>` : ''}
         <div>担当者：${safeHtml(r.reporter)}</div>
         <div>報告日：${safeHtml(r.dateStr||r.date)}</div>
       </div>
-      <div class="pdf-stamp-box"><div class="pdf-stamp-label">会社印</div></div>
     </div>
   </div>`;
 }
