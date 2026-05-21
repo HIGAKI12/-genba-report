@@ -106,6 +106,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 .small-btn:hover{background:var(--blue2);border-color:var(--blue3);}
 .small-btn.danger{color:var(--red);}
 .small-btn.danger:hover{background:var(--red2);border-color:var(--red);}
+.export-import-bar{display:flex;gap:8px;margin-bottom:12px;}
 .loading-dots span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fff;margin:0 3px;animation:ld .9s infinite;}
 .loading-dots span:nth-child(2){animation-delay:.2s;}
 .loading-dots span:nth-child(3){animation-delay:.4s;}
@@ -210,6 +211,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
   <!-- 履歴ページ -->
   <div class="page" id="page-history">
     <div style="height:16px;"></div>
+    <div class="export-import-bar">
+      <button class="small-btn" onclick="exportReports()">📤 エクスポート</button>
+      <label class="small-btn" style="cursor:pointer;">📥 インポート<input type="file" accept=".json" onchange="importReports(event)" style="display:none;"></label>
+    </div>
     <div id="reports-list"></div>
   </div>
 </div>
@@ -508,6 +513,33 @@ async function renderReports(){
   }).join('');
 }
 
+async function exportReports(){
+  const reports = await dbGetAll();
+  if(!reports.length){alert('エクスポートする報告書がありません。');return;}
+  const blob = new Blob([JSON.stringify(reports)],{type:'application/json;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `genba_reports_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+async function importReports(e){
+  const file = e.target.files[0]; if(!file) return;
+  try{
+    const reports = JSON.parse(await file.text());
+    if(!Array.isArray(reports)) throw new Error();
+    let count = 0;
+    for(const r of reports){if(r.id && r.siteName){await dbPut(r);count++;}}
+    alert(`${count}件の報告書をインポートしました。`);
+    renderReports();
+  }catch(err){
+    alert('インポートに失敗しました。正しいエクスポートファイルを選択してください。');
+  }
+  e.target.value='';
+}
 async function deleteReport(id){
   if(!confirm('この報告書を削除しますか？')) return;
   await dbDelete(id);
