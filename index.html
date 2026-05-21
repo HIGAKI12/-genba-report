@@ -237,21 +237,57 @@ function initApp(){
   loadCompanySettings();
   if(!areas.length) addArea();
 }
-function migrateStripImages(){
+// --- IndexedDB ---
+let dbInstance = null;
+function openDB(){
+  if(dbInstance) return Promise.resolve(dbInstance);
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open('genba_reports_v1',1);
+    req.onupgradeneeded = e=>e.target.result.createObjectStore('reports',{keyPath:'id'});
+    req.onsuccess = e=>{dbInstance=e.target.result;resolve(dbInstance);};
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function dbGetAll(){
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const req = db.transaction('reports','readonly').objectStore('reports').getAll();
+    req.onsuccess = ()=>resolve(req.result.sort((a,b)=>b.id-a.id));
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function dbPut(report){
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('reports','readwrite');
+    tx.objectStore('reports').put(report);
+    tx.oncomplete = resolve;
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+async function dbDelete(id){
+  const db = await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction('reports','readwrite');
+    tx.objectStore('reports').delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+async function migrateFromLocalStorage(){
   try{
-    const reports = JSON.parse(localStorage.getItem('reports')||'[]');
-    let changed = false;
-    reports.forEach(r=>{
-      (r.areas||[]).forEach(a=>{
-        if(a.beforeImg){a.beforeImg=null;changed=true;}
-        if(a.afterImg){a.afterImg=null;changed=true;}
-      });
-    });
-    if(changed) localStorage.setItem('reports', JSON.stringify(reports));
+    const raw = localStorage.getItem('reports');
+    if(!raw) return;
+    const old = JSON.parse(raw);
+    if(!old.length){localStorage.removeItem('reports');return;}
+    const existing = await dbGetAll();
+    if(existing.length>0){localStorage.removeItem('reports');return;}
+    for(const r of old) await dbPut(r);
+    localStorage.removeItem('reports');
   }catch(e){}
 }
-window.onload = ()=>{
-  migrateStripImages();
+window.onload = async ()=>{
+  await migrateFromLocalStorage();
   if(localStorage.getItem('anthropic_api_key')){
     document.getElementById('api-screen').style.display = 'none';
     document.getElementById('main-app').style.display = 'block';
@@ -405,7 +441,7 @@ async function generateAreaDescription(id){
 }
 
 // --- Save & PDF ---
-function savePDF(){
+async function savePDF(){
   const cs = getCompanySettings();
   const companyName = cs.name || '';
   const companyPhone = cs.phone || '';
@@ -431,22 +467,12 @@ function savePDF(){
     }))
   };
 
-  const reportForStorage = {
-    ...reportWithImages,
-    areas: reportWithImages.areas.map(a=>({...a, beforeImg:null, afterImg:null}))
-  };
-
-  try{
-    const reports = getReports();
-    reports.unshift(reportForStorage);
-    if(reports.length > 100) reports.pop();
-    localStorage.setItem('reports', JSON.stringify(reports));
-  }catch(e){
-    alert('ストレージ容量不足のため保存できませんでした。古いレポートを削除してください。');
-    return;
-  }
-
   openPrintWindow(reportWithImages);
+  try{
+    await dbPut(reportWithImages);
+  }catch(e){
+    alert('保存に失敗しました。');
+  }
   if(confirm('報告書を保存しました！フォームをリセットしますか？')) resetForm();
 }
 
@@ -461,11 +487,8 @@ function resetForm(){
   areas = []; areaCounter = 0; addArea();
 }
 
-// --- Reports Storage ---
-function getReports(){return JSON.parse(localStorage.getItem('reports') || '[]');}
-
-function renderReports(){
-  const reports = getReports();
+async function renderReports(){
+  const reports = await dbGetAll();
   const list = document.getElementById('reports-list');
   if(!reports.length){
     list.innerHTML = `<div class="history-empty"><div class="history-empty-icon">📋</div>まだ報告書がありません。<br>「作成」タブから報告書を作成してください。</div>`;
@@ -489,12 +512,16 @@ function renderReports(){
   }).join('');
 }
 
-function deleteReport(id){
+async function deleteReport(id){
   if(!confirm('この報告書を削除しますか？')) return;
-  localStorage.setItem('reports', JSON.stringify(getReports().filter(r=>r.id!==id)));
+  await dbDelete(id);
   renderReports();
 }
-function rePDF(id){ const r=getReports().find(r=>r.id===id); if(r) openPrintWindow(r); }
+async function rePDF(id){
+  const reports = await dbGetAll();
+  const r = reports.find(r=>r.id===id);
+  if(r) openPrintWindow(r);
+}
 
 
 // --- PDF Generation ---
