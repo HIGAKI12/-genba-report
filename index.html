@@ -441,7 +441,7 @@ async function generateAreaDescription(id){
 }
 
 // --- Save & PDF ---
-async function savePDF(){
+function savePDF(){
   const cs = getCompanySettings();
   const companyName = cs.name || '';
   const companyPhone = cs.phone || '';
@@ -468,11 +468,7 @@ async function savePDF(){
   };
 
   openPrintWindow(reportWithImages);
-  try{
-    await dbPut(reportWithImages);
-  }catch(e){
-    alert('保存に失敗しました。');
-  }
+  dbPut(reportWithImages).catch(()=>alert('保存に失敗しました。'));
   if(confirm('報告書を保存しました！フォームをリセットしますか？')) resetForm();
 }
 
@@ -663,8 +659,14 @@ function openPrintWindow(r){
   if(w){
     setTimeout(()=>URL.revokeObjectURL(url), 8000);
   } else {
-    alert('ポップアップがブロックされました。ブラウザのポップアップ許可設定をご確認ください。');
-    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${r.siteName}_${r.workType||'報告書'}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    alert('報告書をダウンロードしました。\nダウンロードしたファイルをブラウザで開いて、印刷→PDFに保存してください。');
   }
 }
 </script>
