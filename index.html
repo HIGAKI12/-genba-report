@@ -410,8 +410,8 @@ async function generateAreaDescription(id){
   renderAreas();
 
   const content = [];
-  if(a.beforeImg) content.push({type:'image', source:{type:'base64', media_type:a.beforeImg.mtype||'image/jpeg', data:a.beforeImg.base64}});
-  if(a.afterImg)  content.push({type:'image', source:{type:'base64', media_type:a.afterImg.mtype||'image/jpeg',  data:a.afterImg.base64}});
+  if(a.beforeImg){const b64=a.beforeImg.base64||(a.beforeImg.dataUrl||'').split(',')[1]; if(b64) content.push({type:'image', source:{type:'base64', media_type:a.beforeImg.mtype||'image/jpeg', data:b64}});}
+  if(a.afterImg) {const b64=a.afterImg.base64 ||(a.afterImg.dataUrl ||'').split(',')[1]; if(b64) content.push({type:'image', source:{type:'base64', media_type:a.afterImg.mtype ||'image/jpeg', data:b64}});}
 
   let promptText = '';
   if(a.beforeImg && a.afterImg){
