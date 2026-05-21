@@ -205,7 +205,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
       <textarea class="form-textarea" id="notes" placeholder="例：各箇所とも大きな損傷等は確認されませんでした。"></textarea>
     </div>
 
-    <button class="gen-btn" onclick="savePDF()">📄 PDF報告書を出力・保存</button>
+    <button class="gen-btn" onclick="savePDF()"><span id="gen-btn-text">📄 PDF報告書を出力・保存</span></button>
   </div>
 
   <!-- 履歴ページ -->
@@ -223,6 +223,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark
 let areas = [];
 let areaCounter = 0;
 let saveTimer;
+let editingId = null;
 
 // --- API Key ---
 function saveApiKey(){
@@ -461,7 +462,7 @@ function savePDF(){
   const dateStr = date ? new Date(date).toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'}) : '';
 
   const reportWithImages = {
-    id: Date.now(), siteName, siteAddress, date, dateStr, workType, nextDate,
+    id: editingId !== null ? editingId : Date.now(), siteName, siteAddress, date, dateStr, workType, nextDate,
     reporter, companyName, companyPhone, recipientName, notes,
     savedAt: new Date().toISOString(),
     areas: areas.map(a=>({
@@ -474,6 +475,8 @@ function savePDF(){
 
   openPrintWindow(reportWithImages);
   dbPut(reportWithImages).catch(()=>alert('保存に失敗しました。'));
+  editingId = null;
+  document.getElementById('gen-btn-text').textContent = '📄 PDF報告書を出力・保存';
   if(confirm('報告書を保存しました！フォームをリセットしますか？')) resetForm();
 }
 
@@ -486,6 +489,8 @@ function resetForm(){
   document.getElementById('recipient-name').value = '';
   document.getElementById('notes').value = '';
   areas = []; areaCounter = 0; addArea();
+  editingId = null;
+  document.getElementById('gen-btn-text').textContent = '📄 PDF報告書を出力・保存';
 }
 
 async function renderReports(){
@@ -506,6 +511,7 @@ async function renderReports(){
         <div class="report-area-names">${areaNames}</div>
         <div class="report-actions">
           <button class="small-btn" onclick="rePDF(${r.id})">📄 PDF保存</button>
+          <button class="small-btn" onclick="editReport(${r.id})">✏️ 編集</button>
           <button class="small-btn danger" onclick="deleteReport(${r.id})">🗑️ 削除</button>
         </div>
       </div>
@@ -539,6 +545,31 @@ async function importReports(e){
     alert('インポートに失敗しました。正しいエクスポートファイルを選択してください。');
   }
   e.target.value='';
+}
+async function editReport(id){
+  const reports = await dbGetAll();
+  const r = reports.find(r=>r.id===id);
+  if(!r) return;
+  document.getElementById('site-name').value = r.siteName||'';
+  document.getElementById('site-address').value = r.siteAddress||'';
+  document.getElementById('report-date').value = r.date||'';
+  document.getElementById('work-type').value = r.workType||'定期清掃';
+  document.getElementById('next-date').value = r.nextDate||'';
+  document.getElementById('reporter').value = r.reporter||'';
+  document.getElementById('recipient-name').value = r.recipientName||'';
+  document.getElementById('notes').value = r.notes||'';
+  areas = (r.areas||[]).map((a,idx)=>({
+    id:idx, name:a.name||'',
+    beforeImg:a.beforeImg||null, afterImg:a.afterImg||null,
+    beforeDesc:a.beforeDesc||'', afterDesc:a.afterDesc||'', comment:a.comment||'',
+    isGenerating:false
+  }));
+  areaCounter = areas.length;
+  editingId = id;
+  document.getElementById('gen-btn-text').textContent = '📄 PDF報告書を更新・保存';
+  showPage('create');
+  renderAreas();
+  window.scrollTo(0,0);
 }
 async function deleteReport(id){
   if(!confirm('この報告書を削除しますか？')) return;
